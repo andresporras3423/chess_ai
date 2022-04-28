@@ -90,7 +90,8 @@ class Game {
                              total_movements,
                              color,
                              false,
-                             movements);
+                             movements,
+                            this.updateGameStatus());
     const game_finished = this.is_it_game_over() ? true : false;
     this.board.game_finished = game_finished;
   };
@@ -103,5 +104,14 @@ class Game {
     console.log(`turn: ${Math.ceil(this.moves_done / 2)}`);
     console.log(this.board.print_info());
   };
+
+  updateGameStatus = ()=>{
+    if(this.board.game_finished){
+      if(this.board.movements_available>0) return "draw because of lack of pieces";
+      else if(this.positions.last_movement[0]==="b" && this.positions.white_king_attacked(this.positions.white_pieces.wk)) return "black wins";
+      else if(this.positions.last_movement[0]==="w" && this.positions.black_king_attacked(this.positions.black_pieces.bk)) return "white wins";
+      return "draw because of stalemate";
+    }
+  }
 }
 export default Game;

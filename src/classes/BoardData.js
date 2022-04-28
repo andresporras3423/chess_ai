@@ -1,12 +1,14 @@
 import CellData from "./CellData.js";
+import ComputerMove from "./ComputerMove.js";
 import Positions from "./positions/Positions.js";
 import Game from "./positions/Game.js";
 import Cell from "./positions/Cell.js";
 // this class contains all the information about board situation
 class BoardData {
-  constructor(nPlayWithWhite=true, nGameStarted="") {
+  constructor(nPlayWithWhite=true, nGameStarted="", nDeepness=2) {
     this.game = new Game();
     this.game.positions = new Positions();
+    this.computerMove = new ComputerMove(this.game, nDeepness);
     this.selectedPiece = null; // clicked piece by player to move
     this.whitePlaying = true; // indicates whether the current turn is for white or not
     this.playWithWhite = nPlayWithWhite; // indicates if board use white perspective or black perspective
@@ -53,16 +55,7 @@ class BoardData {
     this.game.positions.set_board();
     this.lastMovementCoordinates[0]==="w" ? this.game.add_recent_board("black") : this.game.add_recent_board("white");
     this.availableMoves = Array.from(this.game.board.movements).map((move)=>this.last_movement_reduced(move));
-    this.updateGameStatus();
-  }
-
-  updateGameStatus = ()=>{
-    if(this.game.board.game_finished){
-      if(this.game.board.movements_available>0) this.gameMessage = "draw because of lack of pieces";
-      else if(this.game.positions.last_movement[0]==="b" && this.game.positions.white_king_attacked(this.game.positions.white_pieces.wk)) this.gameMessage= "black wins";
-      else if(this.game.positions.last_movement[0]==="w" && this.game.positions.black_king_attacked(this.game.positions.black_pieces.bk)) this.gameMessage= "white wins";
-      else this.gameMessage = "draw because of stalemate";
-    }
+    this.gameMessage = this.game.board.game_status;
   }
 
   // update positions.white_pieces and positions.black_pieces using objectCells
@@ -304,6 +297,7 @@ class BoardData {
       this.selectedPiece=null;
       this.whitePlaying = !this.whitePlaying;
       this.getAllAvailableMoves();
+      this.computerMove.doMove();
   }
 }
 

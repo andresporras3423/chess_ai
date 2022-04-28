@@ -11,7 +11,8 @@ class BoardData {
     movements_available_,
     next_player_,
     game_finished_,
-    movements_
+    movements_,
+    game_status_
   ) {
     this.pieces_position = pieces_position_;
     this.total_black_pieces = total_black_pieces_;
@@ -25,6 +26,7 @@ class BoardData {
     this.next_player = next_player_;
     this.game_finished = game_finished_;
     this.movements = movements_;
+    this.game_status = game_status_;
   }
 
   print_info = () => {
@@ -39,7 +41,8 @@ white long castling: ${this.white_long_castling}
 white short castling: ${this.white_short_castling}
 most recent movement: ${this.last_movement}
 total movements available: ${this.movements_available}
-next_player: ${this.next_player}
+next player: ${this.next_player}
+game status: ${this.game_status}
 `;
   };
 }
