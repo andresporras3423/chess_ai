@@ -5,10 +5,10 @@ import Game from "./positions/Game.js";
 import Cell from "./positions/Cell.js";
 // this class contains all the information about board situation
 class BoardData {
-  constructor(nPlayWithWhite=true, nGameStarted="", nDeepness=2) {
+  constructor(nPlayWithWhite=true, nGameStarted="", nDepth=2) {
     this.game = new Game();
     this.game.positions = new Positions();
-    this.computerMove = new ComputerMove(this.game, nDeepness);
+    this.computerMove = new ComputerMove(this.game, nDepth, !nPlayWithWhite);
     this.selectedPiece = null; // clicked piece by player to move
     this.whitePlaying = true; // indicates whether the current turn is for white or not
     this.playWithWhite = nPlayWithWhite; // indicates if board use white perspective or black perspective
