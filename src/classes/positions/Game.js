@@ -112,6 +112,7 @@ class Game {
       else if(this.positions.last_movement[0]==="w" && this.positions.black_king_attacked(this.positions.black_pieces.bk)) return "white wins";
       return "draw because of stalemate";
     }
+    return "game started";
   }
 }
 export default Game;
