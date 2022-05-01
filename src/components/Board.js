@@ -31,16 +31,16 @@ class Board extends React.Component {
         },
         // first argument indicates white perspective
         // second argument assigns gameMessage
-        // allow select pieces by setting "Game started" as initial message
+        // allow select pieces by setting "game started" as initial message
         // a different message blocks selection of any piece
         startGame: ()=>{
           this.setState({
-            boardData: new BoardData(this.state.playWithWhite, "Game started")
+            boardData: new BoardData(this.state.playWithWhite, "game started")
           });
         },
         clickCell: (cell)=>{
           // If message is empty then games hasn't started yet and user shouldn't been able todo any move
-          if(this.state.boardData.gameMessage!=="Game started") return;
+          if(this.state.boardData.gameMessage!=="game started") return;
           // id this is a promotion move then extra steps, otherwise the board was already updated and just need to re-render the view
           const doPromotion = this.state.boardData.selectPiece(cell);
           if(doPromotion){

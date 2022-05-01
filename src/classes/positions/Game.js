@@ -91,9 +91,10 @@ class Game {
                              color,
                              false,
                              movements,
-                            this.updateGameStatus());
+                            null);
     const game_finished = this.is_it_game_over() ? true : false;
     this.board.game_finished = game_finished;
+    this.board.game_status = this.updateGameStatus();
   };
 
   last_movement_reduced = () => {

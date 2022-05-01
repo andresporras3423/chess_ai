@@ -5,7 +5,7 @@ import Game from "./positions/Game.js";
 import Cell from "./positions/Cell.js";
 // this class contains all the information about board situation
 class BoardData {
-  constructor(nPlayWithWhite=true, nGameStarted="", nDepth=2) {
+  constructor(nPlayWithWhite=true, nGameStarted="", nDepth=3) {
     this.game = new Game();
     this.game.positions = new Positions();
     this.computerMove = new ComputerMove(this.game, nDepth, !nPlayWithWhite);

@@ -1081,7 +1081,7 @@ class Positions {
 
   set_board = () => {
     this.cells = [...Array(8)].map((x) => (x = Array(8).fill("")));
-    this.temp_cells = [...Array(8)].map((x) => (x = Array(8).fill("")));
+      this.temp_cells = [...Array(8)].map((x) => (x = Array(8).fill("")));
     Object.entries(this.black_pieces).forEach(([piece, position]) => {
       this.cells[position.y][position.x] = piece;
     });
