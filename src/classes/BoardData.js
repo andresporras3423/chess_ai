@@ -5,7 +5,7 @@ import Game from "./positions/Game.js";
 import Cell from "./positions/Cell.js";
 // this class contains all the information about board situation
 class BoardData {
-  constructor(nPlayWithWhite=true, nGameStarted="", nDepth=3) {
+  constructor(nPlayWithWhite=true, nGameStarted="", nDepth=2) {
     this.game = new Game();
     this.game.positions = new Positions();
     this.computerMove = new ComputerMove(this.game, nDepth, !nPlayWithWhite);
@@ -202,13 +202,13 @@ class BoardData {
   check_castling = (cell1, cell2)=>{
       if(cell1.piece==="bk"){
         // check if movement is black long castling and it is still available
-        if(cell2.y===0 && cell2.x===2){ 
+        if(cell1.y===0 && cell1.x===4 && cell2.y===0 && cell2.x===2){ 
           // move black rock to castling position
           this.objectCells[0][0].piece="";
           this.objectCells[0][3].piece="br";
         }
         // check if movement is black short castling and it is still available
-        else if(cell2.y===0 && cell2.x===6){ 
+        else if(cell1.y===0 && cell1.x===4 && cell2.y===0 && cell2.x===6){ 
           // move black rock to castling position
           this.objectCells[0][7].piece="";
           this.objectCells[0][5].piece="br";
@@ -223,13 +223,13 @@ class BoardData {
     
       if(cell1.piece==="wk"){
         // check if movement is white long castling and it is still available
-    if(cell1.piece==="wk" && cell2.y===7 && cell2.x===2){
+    if(cell1.y===7 && cell1.x===4 && cell2.y===7 && cell2.x===2){
       // move white rock to castling position
       this.objectCells[7][0].piece="";
       this.objectCells[7][3].piece="wr";
     }
     // check if movement is white short castling and is still available
-    else if(cell1.piece==="wk" && cell2.y===7 && cell2.x===6){ 
+    else if(cell1.y===7 && cell1.x===4 && cell2.y===7 && cell2.x===6){ 
       // move white rock to castling position
       this.objectCells[7][7].piece="";
       this.objectCells[7][5].piece="wr";
@@ -267,7 +267,7 @@ class BoardData {
     return move.split(",").slice(0,6).map(pos=> pos.substring(0,2)).join(",");
   };
   // cell is second clicked cell to choose destiny from piece to move
-  updateBoardAfterValidMove = (cell, newPiece)=>{
+  updateBoardAfterValidMove = (cell, newPiece, humanMove=true)=>{
     // move to corner has as keys the coordinates of board corners
     // the value is a function to update the castling of the corner to false
     const moveToCorner = {"00": ()=> this.blackLongCastling=false,"07": ()=> this.blackShortCastling=false,"70": ()=> this.whiteLongCastling=false,"77": ()=> this.whiteShortCastling=false};
@@ -297,7 +297,12 @@ class BoardData {
       this.selectedPiece=null;
       this.whitePlaying = !this.whitePlaying;
       this.getAllAvailableMoves();
-      this.computerMove.doMove();
+      if(humanMove && !this.game.board.game_finished){
+        let computer_move = this.computerMove.doMove();
+        computer_move = this.last_movement_reduced(computer_move).split(",");
+        this.selectedPiece = this.objectCells[computer_move[1]][computer_move[2]];
+        this.updateBoardAfterValidMove(this.objectCells[computer_move[4]][computer_move[5]], computer_move[3], false)
+      }
   }
 }
 

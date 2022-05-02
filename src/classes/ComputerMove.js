@@ -11,7 +11,7 @@ class ComputerMove {
   }
 
   doMove = ()=>{
-    let selected_move = this.best_position();
+    return this.best_position();
   }
 
   best_position = ()=>{
