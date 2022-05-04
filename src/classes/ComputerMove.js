@@ -8,6 +8,7 @@ class ComputerMove {
     this.game = nGame;
     this.depth = ndepth;
     this.computerColor = computerWithWhite ? "white" : "black";
+    this.totalCalls=0;
   }
 
   doMove = ()=>{
@@ -37,10 +38,13 @@ class ComputerMove {
         best_moves = [move];
       }
     });
+    console.log(this.totalCalls);
+    this.totalCalls=0;
     return best_moves[Math.floor(Math.random()*best_moves.length)];
   }
 
   minimax = (game, depth, isComputerMove)=>{
+    this.totalCalls++;
     const status = game.board.game_status;
     if(status.slice(0,4)==="draw") return 0;
     if(status==="game started" && depth===0){
