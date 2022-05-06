@@ -2,9 +2,9 @@ function generate_boards(){
   let board=[
     ["r","n","b","q","k","b","n","r"],
     ["p","p","p","p","p","p","p","p"],
+    [" "," "," "," ","P"," "," "," "],
     [" "," "," "," "," "," "," "," "],
-    [" "," "," "," "," "," "," "," "],
-    [" "," "," "," "," "," "," "," "],
+    [" "," "," "," ","n"," "," "," "],
     ["p"," "," "," "," ","p"," ","p"],
     ["P","P","P","P","P","P","P","P"],
     ["R","N","B","Q","K","B","N","R"]]
@@ -63,21 +63,22 @@ function generate_array(pieces){
     return array;
 }
 
-function shift(num, positions){
-  return num << positions
-}
-
-const column_a = BigInt("0b10000000100000001000000010000000100000001000000010000000")
-const column_h = BigInt("0b00000001000000010000000100000001000000010000000100000001")
-const occupy = BigInt("0b11111111111111111111111111111111111111111111111111111111")
+const column_a = BigInt("0b1000000010000000100000001000000010000000100000001000000010000000")
+const column_h = BigInt("0b0000000100000001000000010000000100000001000000010000000100000001")
+const occupy = BigInt("0b1111111111111111111111111111111111111111111111111111111111111111")
 const inverted_column_h = occupy^column_h;
 const inverted_column_a = occupy^column_a;
+const row_4 =  BigInt("0b0000000000000000000000000000000011111111000000000000000000000000")
 
 function testing_white_moves(){
   let pieces = generate_boards();
   const blacks_except_k = pieces["p"]|pieces["n"]|pieces["b"]|pieces["r"]|pieces["q"];
-  console.log((shift(pieces["P"],7n)&inverted_column_a&blacks_except_k).toString(2)); //this only calculate right side attacks
-  console.log((shift(pieces["P"],9n)&inverted_column_h&blacks_except_k).toString(2)); //this only calculate right side attacks
+  const all_pieces = pieces["p"]|pieces["n"]|pieces["b"]|pieces["r"]|pieces["q"]||pieces["k"]|pieces["P"]|pieces["N"]|pieces["B"]|pieces["R"]|pieces["Q"]||pieces["K"];
+  const inverted_all_pieces= all_pieces^occupy;
+  console.log(((pieces["P"]<<7n)&inverted_column_a&blacks_except_k).toString(2)); //this only calculate right side attacks
+  console.log(((pieces["P"]<<9n)&inverted_column_h&blacks_except_k).toString(2)); //this only calculate left side attacks
+  console.log(((pieces["P"]<<8n)&inverted_all_pieces).toString(2)); //advance one cell ahead
+  console.log(((pieces["P"]<<16n)&inverted_all_pieces&(inverted_all_pieces<<8n)&row_4).toString(2)); //advance two cells ahead from the second row
 }
 testing_white_moves();
 // console.log(shift(column_a, 1));
