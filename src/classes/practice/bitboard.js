@@ -1,11 +1,11 @@
 function generate_boards(){
   let board=[
     ["r","n","b","q","k","b","n","r"],
-    ["p","p","p","p","p","p","p","p"],
-    [" "," "," "," ","P"," "," "," "],
+    ["p","p"," ","p","p","p","p","p"],
     [" "," "," "," "," "," "," "," "],
-    [" "," "," "," ","n"," "," "," "],
-    ["p"," "," "," "," ","p"," ","p"],
+    [" ","P","p"," "," "," "," "," "],
+    [" "," "," "," "," "," "," "," "],
+    [" "," "," "," "," "," "," "," "],
     ["P","P","P","P","P","P","P","P"],
     ["R","N","B","Q","K","B","N","R"]]
     let boardBinary = "0000000000000000000000000000000000000000000000000000000000000000"
@@ -66,9 +66,16 @@ function generate_array(pieces){
 const column_a = BigInt("0b1000000010000000100000001000000010000000100000001000000010000000")
 const column_h = BigInt("0b0000000100000001000000010000000100000001000000010000000100000001")
 const occupy = BigInt("0b1111111111111111111111111111111111111111111111111111111111111111")
+const only_ones = "1111111111111111111111111111111111111111111111111111111111111111";
 const inverted_column_h = occupy^column_h;
 const inverted_column_a = occupy^column_a;
 const row_4 =  BigInt("0b0000000000000000000000000000000011111111000000000000000000000000")
+let last_move={
+  "piece1": "p",
+  "position1": BigInt("0b100000000000000000000000000000000000000000000000000000"),
+  "piece2": "p",
+  "position2": BigInt("0b10000000000000000000000000000000000000"),
+}
 
 function testing_white_moves(){
   let pieces = generate_boards();
@@ -79,6 +86,10 @@ function testing_white_moves(){
   console.log(((pieces["P"]<<9n)&inverted_column_h&blacks_except_k).toString(2)); //this only calculate left side attacks
   console.log(((pieces["P"]<<8n)&inverted_all_pieces).toString(2)); //advance one cell ahead
   console.log(((pieces["P"]<<16n)&inverted_all_pieces&(inverted_all_pieces<<8n)&row_4).toString(2)); //advance two cells ahead from the second row
+  if(last_move["piece1"]==="p" && (last_move["position2"]<<16n)===last_move["position1"]){ // if last move was a black pawn that advanced two cells
+    console.log(((pieces["P"]<<9n)&inverted_column_h&(last_move["position2"]<<8n)).toString(2)) // left capture in en passant
+    console.log(((pieces["P"]<<7n)&inverted_column_a&(last_move["position2"]<<8n)).toString(2)) // right capture in en passant
+  }
 }
 testing_white_moves();
 // console.log(shift(column_a, 1));
