@@ -94,7 +94,7 @@ function testing_white_pawn_moves(){
 
 function testing_white_rock_moves(){
   let pieces = generate_boards();
-  let occ = "00001010";
+  let occ = "11001010";
   let slid = "00001000";
   const all_row = BigInt("0b11111111"); // just number 1
   const row_unit = BigInt("0b00000001"); // just number 1
@@ -111,13 +111,13 @@ function testing_white_rock_moves(){
   let rev_slider = BigInt(`0b${slid.split("").reverse().join("")}`)
   let rev_remove_slider = rev_occupied-rev_slider;
   if(rev_slider>rev_remove_slider){ //it happens when there no pieces left side the rock
-    let sol = (all_row-((rev_slider<<1n)-row_unit));
-    console.log(sol.toString(2).split("").reverse().join(""))
+    let sol = (all_row-(all_row-((rev_slider<<1n)-row_unit)));
+    console.log(sol.toString(2).split("").reverse().map(x=> x==="0" ? "1" : "0").join(""))
   }else{
-    let sol = (rev_occupied^(rev_occupied-rev_slider-rev_slider));
-    console.log(sol.toString(2).split("").reverse().join("")) // this calculates left side possible moves from the rock
+    let sol = (all_row-(rev_occupied^(rev_occupied-rev_slider-rev_slider)));
+    console.log(sol.toString(2).split("").reverse().map(x=> x==="0" ? "1" : "0").join("")) // this calculates left side possible moves from the rock
   }
-  // (n << d)|(n >> (INT_BITS - d))
+  //console.log(((BigInt("0b10100001") >> 2n)|(BigInt("0b10100001") << 6n)).toString(2));
 } 
 testing_white_rock_moves();
 
