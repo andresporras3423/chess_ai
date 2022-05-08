@@ -77,7 +77,7 @@ let last_move={
   "position2": BigInt("0b10000000000000000000000000000000000000"),
 }
 
-function testing_white_moves(){
+function testing_white_pawn_moves(){
   let pieces = generate_boards();
   const blacks_except_k = pieces["p"]|pieces["n"]|pieces["b"]|pieces["r"]|pieces["q"];
   const all_pieces = pieces["p"]|pieces["n"]|pieces["b"]|pieces["r"]|pieces["q"]||pieces["k"]|pieces["P"]|pieces["N"]|pieces["B"]|pieces["R"]|pieces["Q"]||pieces["K"];
@@ -91,7 +91,37 @@ function testing_white_moves(){
     console.log(((pieces["P"]<<7n)&inverted_column_a&(last_move["position2"]<<8n)).toString(2)) // right capture in en passant
   }
 }
-testing_white_moves();
+
+function testing_white_rock_moves(){
+  let pieces = generate_boards();
+  let occ = "00001010";
+  let slid = "00001000";
+  const all_row = BigInt("0b11111111"); // just number 1
+  const row_unit = BigInt("0b00000001"); // just number 1
+  let occupied = BigInt(`0b${occ}`); // this represents all the pieces present in a row
+  let slider = BigInt(`0b${slid}`); // this represent rock piece in the row
+  let remove_slider = occupied-slider;
+  if(slider>remove_slider){ //it happens when there no pieces left side the rock
+    console.log((all_row-((slider<<1n)-row_unit)).toString(2))
+  }else{
+    console.log((occupied^(occupied-slider-slider)).toString(2)) // this calculates left side possible moves from the rock
+  }
+  // from here calculate possible moves to right direction
+  let rev_occupied = BigInt(`0b${occ.split("").reverse().join("")}`)
+  let rev_slider = BigInt(`0b${slid.split("").reverse().join("")}`)
+  let rev_remove_slider = rev_occupied-rev_slider;
+  if(rev_slider>rev_remove_slider){ //it happens when there no pieces left side the rock
+    let sol = (all_row-((rev_slider<<1n)-row_unit));
+    console.log(sol.toString(2).split("").reverse().join(""))
+  }else{
+    let sol = (rev_occupied^(rev_occupied-rev_slider-rev_slider));
+    console.log(sol.toString(2).split("").reverse().join("")) // this calculates left side possible moves from the rock
+  }
+  // (n << d)|(n >> (INT_BITS - d))
+} 
+testing_white_rock_moves();
+
+// testing_white_moves();
 // console.log(shift(column_a, 1));
 // let pie = generate_boards();
 // console.log(generate_array(pie));
