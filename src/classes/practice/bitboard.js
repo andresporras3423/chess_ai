@@ -2,12 +2,12 @@ function generate_boards(){
   let board=[
     ["r","n","b","q","k","b","n","r"],
     ["p","p"," ","p","p","p","p","p"],
-    [" "," "," "," "," "," "," "," "],
+    [" "," "," "," "," "," "," ","N"],
     [" ","P"," "," "," "," "," "," "],
     [" "," "," "," ","p"," "," "," "],
-    [" "," "," "," "," "," "," ","K"],
+    [" "," "," "," "," "," "," "," "],
     ["P","P","P","P","P","P","P","P"],
-    ["R","N","B","Q"," ","B","N","R"]]
+    ["R","N","B","Q","k","B"," ","R"]]
     let boardBinary = "0000000000000000000000000000000000000000000000000000000000000000"
     let pieces={
       "r":BigInt(0),
@@ -64,10 +64,14 @@ function generate_array(pieces){
 }
 
 const column_a = BigInt("0b1000000010000000100000001000000010000000100000001000000010000000")
+const column_b = BigInt("0b0100000001000000010000000100000001000000010000000100000001000000")
+const column_g = BigInt("0b0000001000000010000000100000001000000010000000100000001000000010")
 const column_h = BigInt("0b0000000100000001000000010000000100000001000000010000000100000001")
 const occupy = BigInt("0b1111111111111111111111111111111111111111111111111111111111111111")
 const only_ones = "1111111111111111111111111111111111111111111111111111111111111111";
 const inverted_column_h = occupy^column_h;
+const inverted_column_g = occupy^column_g;
+const inverted_column_b = occupy^column_b;
 const inverted_column_a = occupy^column_a;
 const row_4 =  BigInt("0b0000000000000000000000000000000011111111000000000000000000000000")
 let last_move={
@@ -132,7 +136,19 @@ function test_white_king_moves(){
   let moves_center = (pieces["K"]<<8n)|(pieces["K"]>>8n)
   console.log(((moves_left|moves_right|moves_center)&inverted_white_expect_k).toString(2))
 }
-test_white_king_moves();
+
+function test_white_knight_moves(){
+  let pieces = generate_boards();
+  const white = pieces["P"]|pieces["N"]|pieces["K"]|pieces["B"]|pieces["R"]|pieces["Q"];
+  const inverted_white= white^occupy;
+  let moves_left_one_step = ((pieces["N"]<<17n)|(pieces["N"]>>15n))&inverted_column_h
+  let moves_right_one_step = ((pieces["N"]<<15n)|(pieces["N"]>>17n))&inverted_column_a
+  let moves_left_two_steps = ((pieces["N"]<<10n)|(pieces["N"]>>6n))&inverted_column_h&inverted_column_g
+  let moves_right_two_steps = ((pieces["N"]<<6n)|(pieces["N"]>>10n))&inverted_column_a&inverted_column_b
+  console.log(((moves_left_one_step|moves_right_one_step|moves_left_two_steps|moves_right_two_steps)&inverted_white).toString(2))
+}
+
+test_white_knight_moves();
 
 // testing_white_moves();
 // console.log(shift(column_a, 1));
