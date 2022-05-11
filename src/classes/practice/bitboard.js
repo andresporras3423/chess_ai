@@ -3,10 +3,10 @@ function generate_boards(){
     ["r","n","b"," ","k","b","n","r"],
     ["p","p"," ","p","p","p","p","p"],
     [" "," "," "," "," "," "," ","N"],
-    [" ","P"," "," "," "," "," "," "],
-    [" "," "," "," ","p"," "," "," "],
+    [" ","P","p"," "," "," "," "," "],
+    [" "," "," "," ","p","P"," "," "],
     [" "," "," "," "," "," "," "," "],
-    ["P","P","P","P","P","P","P","P"],
+    ["P","P","P","P","P"," ","P","P"],
     ["R","N","B","Q","K","B"," ","R"]]
     let boardBinary = "0000000000000000000000000000000000000000000000000000000000000000"
     let pieces={
@@ -73,12 +73,13 @@ const inverted_column_h = occupy^column_h;
 const inverted_column_g = occupy^column_g;
 const inverted_column_b = occupy^column_b;
 const inverted_column_a = occupy^column_a;
+const row_5 =  BigInt("0b0000000000000000000000001111111100000000000000000000000000000000")
 const row_4 =  BigInt("0b0000000000000000000000000000000011111111000000000000000000000000")
 let last_move={
-  "piece1": "p",
-  "position1": BigInt("0b100000000000000000000000000000000000000000000000000000"),
-  "piece2": "p",
-  "position2": BigInt("0b10000000000000000000000000000000000000"),
+  "piece1": "P",
+  "position1": BigInt("0b10000000000"),
+  "piece2": "P",
+  "position2": BigInt("0b100000000000000000000000000"),
 }
 
 function testing_white_pawn_moves(){
@@ -93,6 +94,21 @@ function testing_white_pawn_moves(){
   if(last_move["piece1"]==="p" && (last_move["position2"]<<16n)===last_move["position1"]){ // if last move was a black pawn that advanced two cells
     console.log(((pieces["P"]<<9n)&inverted_column_h&(last_move["position2"]<<8n)).toString(2)) // left capture in en passant
     console.log(((pieces["P"]<<7n)&inverted_column_a&(last_move["position2"]<<8n)).toString(2)) // right capture in en passant
+  }
+}
+
+function testing_black_pawn_moves(){
+  let pieces = generate_boards();
+  const whites_except_k = pieces["P"]|pieces["N"]|pieces["B"]|pieces["R"]|pieces["Q"];
+  const all_pieces = pieces["p"]|pieces["n"]|pieces["b"]|pieces["r"]|pieces["q"]||pieces["k"]|pieces["P"]|pieces["N"]|pieces["B"]|pieces["R"]|pieces["Q"]||pieces["K"];
+  const inverted_all_pieces= all_pieces^occupy;
+  console.log(((pieces["p"]>>7n)&inverted_column_h&whites_except_k).toString(2)); //this only calculate right side attacks
+  console.log(((pieces["p"]>>9n)&inverted_column_a&whites_except_k).toString(2)); //this only calculate left side attacks
+  console.log(((pieces["p"]>>8n)&inverted_all_pieces).toString(2)); //advance one cell ahead
+  console.log(((pieces["p"]>>16n)&inverted_all_pieces&(inverted_all_pieces>>8n)&row_5).toString(2)); //advance two cells ahead from the second row
+  if(last_move["piece1"]==="P" && (last_move["position2"]>>16n)===last_move["position1"]){ // if last move was a black pawn that advanced two cells
+    console.log(((pieces["p"]>>9n)&inverted_column_a&(last_move["position2"]>>8n)).toString(2)) // left capture in en passant
+    console.log(((pieces["p"]>>7n)&inverted_column_h&(last_move["position2"]>>8n)).toString(2)) // right capture in en passant
   }
 }
 
@@ -169,7 +185,7 @@ function test_black_knight_moves(){
   console.log(((moves_left_one_step|moves_right_one_step|moves_left_two_steps|moves_right_two_steps)&inverted_black).toString(2))
 }
 
-test_black_king_moves();
+testing_black_pawn_moves();
 
 // testing_white_moves();
 // console.log(shift(column_a, 1));
