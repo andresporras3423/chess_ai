@@ -1,13 +1,13 @@
 function generate_boards(){
   let board=[
-    ["r","n","b"," ","k","b","n","r"],
-    ["p","p"," ","p","p","p","p","p"],
-    [" "," "," "," "," "," "," ","N"],
-    [" ","P","p"," "," "," "," "," "],
-    [" "," "," "," ","p","P"," "," "],
+    [" ","n"," "," ","k"," ","n"," "],
+    ["p","p","p","p","p","p","p","p"],
     [" "," "," "," "," "," "," "," "],
-    ["P","P","P","P","P"," ","P","P"],
-    ["R","N","B","Q","K","B"," ","R"]]
+    [" "," "," "," "," "," "," "," "],
+    [" "," "," "," "," "," "," "," "],
+    [" "," "," "," "," "," "," "," "],
+    ["P","P","P","P","P","P","P","P"],
+    [" ","N"," "," ","K"," ","N"," "]]
     let boardBinary = "0000000000000000000000000000000000000000000000000000000000000000"
     let pieces={
       "r":BigInt(0),
@@ -87,14 +87,16 @@ function testing_white_pawn_moves(){
   const blacks_except_k = pieces["p"]|pieces["n"]|pieces["b"]|pieces["r"]|pieces["q"];
   const all_pieces = pieces["p"]|pieces["n"]|pieces["b"]|pieces["r"]|pieces["q"]||pieces["k"]|pieces["P"]|pieces["N"]|pieces["B"]|pieces["R"]|pieces["Q"]||pieces["K"];
   const inverted_all_pieces= all_pieces^occupy;
-  console.log(((pieces["P"]<<7n)&inverted_column_a&blacks_except_k).toString(2)); //this only calculate right side attacks
-  console.log(((pieces["P"]<<9n)&inverted_column_h&blacks_except_k).toString(2)); //this only calculate left side attacks
-  console.log(((pieces["P"]<<8n)&inverted_all_pieces).toString(2)); //advance one cell ahead
-  console.log(((pieces["P"]<<16n)&inverted_all_pieces&(inverted_all_pieces<<8n)&row_4).toString(2)); //advance two cells ahead from the second row
+  let solution = 0n;
+  solution|=(pieces["P"]<<7n)&inverted_column_a&blacks_except_k; //this only calculate right side attacks
+  solution|=(pieces["P"]<<9n)&inverted_column_h&blacks_except_k; //this only calculate left side attacks
+  solution|=(pieces["P"]<<8n)&inverted_all_pieces; //advance one cell ahead
+  solution|=(pieces["P"]<<16n)&inverted_all_pieces&(inverted_all_pieces<<8n)&row_4; //advance two cells ahead from the second row
   if(last_move["piece1"]==="p" && (last_move["position2"]<<16n)===last_move["position1"]){ // if last move was a black pawn that advanced two cells
-    console.log(((pieces["P"]<<9n)&inverted_column_h&(last_move["position2"]<<8n)).toString(2)) // left capture in en passant
-    console.log(((pieces["P"]<<7n)&inverted_column_a&(last_move["position2"]<<8n)).toString(2)) // right capture in en passant
+    solution|=(pieces["P"]<<9n)&inverted_column_h&(last_move["position2"]<<8n) // left capture in en passant
+    solution|=(pieces["P"]<<7n)&inverted_column_a&(last_move["position2"]<<8n) // right capture in en passant
   }
+  return solution;
 }
 
 function testing_black_pawn_moves(){
@@ -102,14 +104,16 @@ function testing_black_pawn_moves(){
   const whites_except_k = pieces["P"]|pieces["N"]|pieces["B"]|pieces["R"]|pieces["Q"];
   const all_pieces = pieces["p"]|pieces["n"]|pieces["b"]|pieces["r"]|pieces["q"]||pieces["k"]|pieces["P"]|pieces["N"]|pieces["B"]|pieces["R"]|pieces["Q"]||pieces["K"];
   const inverted_all_pieces= all_pieces^occupy;
-  console.log(((pieces["p"]>>7n)&inverted_column_h&whites_except_k).toString(2)); //this only calculate right side attacks
-  console.log(((pieces["p"]>>9n)&inverted_column_a&whites_except_k).toString(2)); //this only calculate left side attacks
-  console.log(((pieces["p"]>>8n)&inverted_all_pieces).toString(2)); //advance one cell ahead
-  console.log(((pieces["p"]>>16n)&inverted_all_pieces&(inverted_all_pieces>>8n)&row_5).toString(2)); //advance two cells ahead from the second row
+  let solution = 0n;
+  solution|=(pieces["p"]>>7n)&inverted_column_h&whites_except_k; //this only calculate right side attacks
+  solution|=(pieces["p"]>>9n)&inverted_column_a&whites_except_k; //this only calculate left side attacks
+  solution|=(pieces["p"]>>8n)&inverted_all_pieces; //advance one cell ahead
+  solution|=(pieces["p"]>>16n)&inverted_all_pieces&(inverted_all_pieces>>8n)&row_5; //advance two cells ahead from the second row
   if(last_move["piece1"]==="P" && (last_move["position2"]>>16n)===last_move["position1"]){ // if last move was a black pawn that advanced two cells
-    console.log(((pieces["p"]>>9n)&inverted_column_a&(last_move["position2"]>>8n)).toString(2)) // left capture in en passant
-    console.log(((pieces["p"]>>7n)&inverted_column_h&(last_move["position2"]>>8n)).toString(2)) // right capture in en passant
+    solution|=(pieces["p"]>>9n)&inverted_column_a&(last_move["position2"]>>8n) // left capture in en passant
+    solution|=(pieces["p"]>>7n)&inverted_column_h&(last_move["position2"]>>8n) // right capture in en passant
   }
+  return solution;
 }
 
 function testing_white_rock_moves(){
@@ -150,7 +154,7 @@ function test_white_king_moves(){
   let moves_left = ((pieces["K"]<<1n)|(pieces["K"]<<9n)|(pieces["K"]>>7n))&inverted_column_h
   let moves_right = ((pieces["K"]>>1n)|(pieces["K"]<<7n)|(pieces["K"]>>9n))&inverted_column_a
   let moves_center = (pieces["K"]<<8n)|(pieces["K"]>>8n)
-  console.log(((moves_left|moves_right|moves_center)&inverted_white_expect_k).toString(2))
+  return (moves_left|moves_right|moves_center)&inverted_white_expect_k
 }
 
 function test_black_king_moves(){
@@ -160,7 +164,7 @@ function test_black_king_moves(){
   let moves_left = ((pieces["k"]<<1n)|(pieces["k"]<<9n)|(pieces["k"]>>7n))&inverted_column_h
   let moves_right = ((pieces["k"]>>1n)|(pieces["k"]<<7n)|(pieces["k"]>>9n))&inverted_column_a
   let moves_center = (pieces["k"]<<8n)|(pieces["k"]>>8n)
-  console.log(((moves_left|moves_right|moves_center)&inverted_black_expect_k).toString(2))
+  return (moves_left|moves_right|moves_center)&inverted_black_expect_k
 }
 
 function test_white_knight_moves(){
@@ -171,7 +175,7 @@ function test_white_knight_moves(){
   let moves_right_one_step = ((pieces["N"]<<15n)|(pieces["N"]>>17n))&inverted_column_a
   let moves_left_two_steps = ((pieces["N"]<<10n)|(pieces["N"]>>6n))&inverted_column_h&inverted_column_g
   let moves_right_two_steps = ((pieces["N"]<<6n)|(pieces["N"]>>10n))&inverted_column_a&inverted_column_b
-  console.log(((moves_left_one_step|moves_right_one_step|moves_left_two_steps|moves_right_two_steps)&inverted_white).toString(2))
+  return (moves_left_one_step|moves_right_one_step|moves_left_two_steps|moves_right_two_steps)&inverted_white
 }
 
 function test_black_knight_moves(){
@@ -182,12 +186,18 @@ function test_black_knight_moves(){
   let moves_right_one_step = ((pieces["n"]<<15n)|(pieces["n"]>>17n))&inverted_column_a
   let moves_left_two_steps = ((pieces["n"]<<10n)|(pieces["n"]>>6n))&inverted_column_h&inverted_column_g
   let moves_right_two_steps = ((pieces["n"]<<6n)|(pieces["n"]>>10n))&inverted_column_a&inverted_column_b
-  console.log(((moves_left_one_step|moves_right_one_step|moves_left_two_steps|moves_right_two_steps)&inverted_black).toString(2))
+  return (moves_left_one_step|moves_right_one_step|moves_left_two_steps|moves_right_two_steps)&inverted_black
 }
 
-testing_black_pawn_moves();
+function cells_attacked_by_black(){
+  return test_black_knight_moves()|test_black_king_moves()|testing_black_pawn_moves();
+}
+
+function cells_attacked_by_white(){
+  return test_white_knight_moves()|test_white_king_moves()|testing_white_pawn_moves();
+}
 
 // testing_white_moves();
-// console.log(shift(column_a, 1));
+console.log(cells_attacked_by_white().toString(2));
 // let pie = generate_boards();
 // console.log(generate_array(pie));
