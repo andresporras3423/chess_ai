@@ -67,7 +67,9 @@ class BitBoardData {
     for (let i = 0; i < 64; i++) {
       if (this.pieces[board[Math.floor(i / 8)][i % 8]] !== undefined) {
         let binary = "1" + this.boardBinary.substring(i + 1);
-        this.pieces[board[Math.floor(i / 8)][i % 8]] += BigInt(parseInt(binary, 2));
+        this.pieces[board[Math.floor(i / 8)][i % 8]] += BigInt(
+          parseInt(binary, 2)
+        );
       }
     }
   };
@@ -104,36 +106,224 @@ class BitBoardData {
     return array;
   }
 
-  testing_white_pawn_moves(){
-    const blacks_except_k = this.pieces["p"]|this.pieces["n"]|this.pieces["b"]|this.pieces["r"]|this.pieces["q"];
-    const all_pieces = this.pieces["p"]|this.pieces["n"]|this.pieces["b"]|this.pieces["r"]|this.pieces["q"]|this.pieces["k"]|this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["R"]|this.pieces["Q"]|this.pieces["K"];
-    const inverted_all_pieces= all_pieces^this.occupy;
+  testing_white_pawn_moves() {
+    const blacks_except_k =
+      this.pieces["p"] |
+      this.pieces["n"] |
+      this.pieces["b"] |
+      this.pieces["r"] |
+      this.pieces["q"];
+    const all_pieces =
+      this.pieces["p"] |
+      this.pieces["n"] |
+      this.pieces["b"] |
+      this.pieces["r"] |
+      this.pieces["q"] |
+      this.pieces["k"] |
+      this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"] |
+      this.pieces["K"];
+    const inverted_all_pieces = all_pieces ^ this.occupy;
     let solution = 0n;
-    solution|=(pieces["P"]<<7n)&this.inverted_column_a&blacks_except_k; //this only calculate right side attacks
-    solution|=(pieces["P"]<<9n)&this.inverted_column_h&blacks_except_k; //this only calculate left side attacks
-    solution|=(pieces["P"]<<8n)&inverted_all_pieces; //advance one cell ahead
-    solution|=(pieces["P"]<<16n)&inverted_all_pieces&(inverted_all_pieces<<8n)&this.row_4; //advance two cells ahead from the second row
-    if(this.last_move["piece1"]==="p" && (this.last_move["position2"]<<16n)===this.last_move["position1"]){ // if last move was a black pawn that advanced two cells
-      solution|=(this.pieces["P"]<<9n)&this.inverted_column_h&(this.last_move["position2"]<<8n) // left capture in en passant
-      solution|=(this.pieces["P"]<<7n)&this.inverted_column_a&(this.last_move["position2"]<<8n) // right capture in en passant
+    solution |= (pieces["P"] << 7n) & this.inverted_column_a & blacks_except_k; //this only calculate right side attacks
+    solution |= (pieces["P"] << 9n) & this.inverted_column_h & blacks_except_k; //this only calculate left side attacks
+    solution |= (pieces["P"] << 8n) & inverted_all_pieces; //advance one cell ahead
+    solution |=
+      (pieces["P"] << 16n) &
+      inverted_all_pieces &
+      (inverted_all_pieces << 8n) &
+      this.row_4; //advance two cells ahead from the second row
+    if (
+      this.last_move["piece1"] === "p" &&
+      this.last_move["position2"] << 16n === this.last_move["position1"]
+    ) {
+      // if last move was a black pawn that advanced two cells
+      solution |=
+        (this.pieces["P"] << 9n) &
+        this.inverted_column_h &
+        (this.last_move["position2"] << 8n); // left capture in en passant
+      solution |=
+        (this.pieces["P"] << 7n) &
+        this.inverted_column_a &
+        (this.last_move["position2"] << 8n); // right capture in en passant
     }
     return solution;
   }
-  
-  testing_black_pawn_moves(){
-    const whites_except_k = this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["R"]|this.pieces["Q"];
-    const all_pieces = this.pieces["p"]|this.pieces["n"]|this.pieces["b"]|this.pieces["r"]|this.pieces["q"]|this.pieces["k"]|this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["R"]|this.pieces["Q"]|this.pieces["K"];
-    const inverted_all_pieces= all_pieces^this.occupy;
+
+  testing_black_pawn_moves() {
+    const whites_except_k =
+      this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"];
+    const all_pieces =
+      this.pieces["p"] |
+      this.pieces["n"] |
+      this.pieces["b"] |
+      this.pieces["r"] |
+      this.pieces["q"] |
+      this.pieces["k"] |
+      this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"] |
+      this.pieces["K"];
+    const inverted_all_pieces = all_pieces ^ this.occupy;
     let solution = 0n;
-    solution|=(this.pieces["p"]>>7n)&this.inverted_column_h&whites_except_k; //this only calculate right side attacks
-    solution|=(this.pieces["p"]>>9n)&this.inverted_column_a&whites_except_k; //this only calculate left side attacks
-    solution|=(this.pieces["p"]>>8n)&inverted_all_pieces; //advance one cell ahead
-    solution|=(this.pieces["p"]>>16n)&inverted_all_pieces&(this.inverted_all_pieces>>8n)&this.row_5; //advance two cells ahead from the second row
-    if(this.last_move["piece1"]==="P" && (this.last_move["position2"]>>16n)===this.last_move["position1"]){ // if last move was a black pawn that advanced two cells
-      solution|=(this.pieces["p"]>>9n)&this.inverted_column_a&(this.last_move["position2"]>>8n) // left capture in en passant
-      solution|=(this.pieces["p"]>>7n)&this.inverted_column_h&(this.last_move["position2"]>>8n) // right capture in en passant
+    solution |=
+      (this.pieces["p"] >> 7n) & this.inverted_column_h & whites_except_k; //this only calculate right side attacks
+    solution |=
+      (this.pieces["p"] >> 9n) & this.inverted_column_a & whites_except_k; //this only calculate left side attacks
+    solution |= (this.pieces["p"] >> 8n) & inverted_all_pieces; //advance one cell ahead
+    solution |=
+      (this.pieces["p"] >> 16n) &
+      inverted_all_pieces &
+      (this.inverted_all_pieces >> 8n) &
+      this.row_5; //advance two cells ahead from the second row
+    if (
+      this.last_move["piece1"] === "P" &&
+      this.last_move["position2"] >> 16n === this.last_move["position1"]
+    ) {
+      // if last move was a black pawn that advanced two cells
+      solution |=
+        (this.pieces["p"] >> 9n) &
+        this.inverted_column_a &
+        (this.last_move["position2"] >> 8n); // left capture in en passant
+      solution |=
+        (this.pieces["p"] >> 7n) &
+        this.inverted_column_h &
+        (this.last_move["position2"] >> 8n); // right capture in en passant
     }
     return solution;
+  }
+
+  test_white_king_moves() {
+    const white_except_k =
+      this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"];
+    const inverted_white_expect_k = white_except_k ^ this.occupy;
+    let moves_left =
+      ((this.pieces["K"] << 1n) |
+        (this.pieces["K"] << 9n) |
+        (this.pieces["K"] >> 7n)) &
+      this.inverted_column_h;
+    let moves_right =
+      ((this.pieces["K"] >> 1n) |
+        (this.pieces["K"] << 7n) |
+        (this.pieces["K"] >> 9n)) &
+      this.inverted_column_a;
+    let moves_center = (this.pieces["K"] << 8n) | (this.pieces["K"] >> 8n);
+    return (moves_left | moves_right | moves_center) & inverted_white_expect_k;
+  }
+
+  test_black_king_moves() {
+    const black_except_k =
+      this.pieces["p"] |
+      this.pieces["n"] |
+      this.pieces["b"] |
+      this.pieces["r"] |
+      this.pieces["q"];
+    const inverted_black_expect_k = black_except_k ^ this.occupy;
+    let moves_left =
+      ((this.pieces["k"] << 1n) |
+        (this.pieces["k"] << 9n) |
+        (this.pieces["k"] >> 7n)) &
+      this.inverted_column_h;
+    let moves_right =
+      ((this.pieces["k"] >> 1n) |
+        (this.pieces["k"] << 7n) |
+        (this.pieces["k"] >> 9n)) &
+      this.inverted_column_a;
+    let moves_center = (this.pieces["k"] << 8n) | (this.pieces["k"] >> 8n);
+    return (moves_left | moves_right | moves_center) & inverted_black_expect_k;
+  }
+
+  test_white_knight_moves() {
+    const white =
+      this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["K"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"];
+    const inverted_white = white ^ this.occupy;
+    let moves_left_one_step =
+      ((this.pieces["N"] << 17n) | (this.pieces["N"] >> 15n)) &
+      this.inverted_column_h;
+    let moves_right_one_step =
+      ((this.pieces["N"] << 15n) | (this.pieces["N"] >> 17n)) &
+      this.inverted_column_a;
+    let moves_left_two_steps =
+      ((this.pieces["N"] << 10n) | (this.pieces["N"] >> 6n)) &
+      this.inverted_column_h &
+      this.inverted_column_g;
+    let moves_right_two_steps =
+      ((this.pieces["N"] << 6n) | (this.pieces["N"] >> 10n)) &
+      this.inverted_column_a &
+      this.inverted_column_b;
+    return (
+      (moves_left_one_step |
+        moves_right_one_step |
+        moves_left_two_steps |
+        moves_right_two_steps) &
+      inverted_white
+    );
+  }
+
+  test_black_knight_moves() {
+    const black =
+      this.pieces["p"] |
+      this.pieces["n"] |
+      this.pieces["k"] |
+      this.pieces["b"] |
+      this.pieces["r"] |
+      this.pieces["q"];
+    const inverted_black = black ^ this.occupy;
+    let moves_left_one_step =
+      ((this.pieces["n"] << 17n) | (this.pieces["n"] >> 15n)) &
+      this.inverted_column_h;
+    let moves_right_one_step =
+      ((this.pieces["n"] << 15n) | (this.pieces["n"] >> 17n)) &
+      this.inverted_column_a;
+    let moves_left_two_steps =
+      ((this.pieces["n"] << 10n) | (this.pieces["n"] >> 6n)) &
+      this.inverted_column_h &
+      this.inverted_column_g;
+    let moves_right_two_steps =
+      ((this.pieces["n"] << 6n) | (this.pieces["n"] >> 10n)) &
+      this.inverted_column_a &
+      this.inverted_column_b;
+    return (
+      (moves_left_one_step |
+        moves_right_one_step |
+        moves_left_two_steps |
+        moves_right_two_steps) &
+      inverted_black
+    );
+  }
+
+  cells_attacked_by_black() {
+    return (
+      this.test_black_knight_moves() |
+      this.test_black_king_moves() |
+      this.testing_black_pawn_moves()
+    );
+  }
+
+  cells_attacked_by_white() {
+    return (
+      this.test_white_knight_moves() |
+      this.test_white_king_moves() |
+      this.testing_white_pawn_moves()
+    );
   }
 }
 
