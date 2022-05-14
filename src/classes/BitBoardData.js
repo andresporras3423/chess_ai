@@ -7,7 +7,7 @@ class BitBoardData {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
+      [" ", " ", " ", " ", "p", " ", " ", " "],
       ["P", "P", "P", "P", "P", "P", "P", "P"],
       [" ", "N", " ", " ", "K", " ", "N", " "],
     ];
@@ -66,9 +66,9 @@ class BitBoardData {
 
   loadBoardPieces = () => {
     for (let i = 0; i < 64; i++) {
-      if (this.pieces[board[Math.floor(i / 8)][i % 8]] !== undefined) {
+      if (this.pieces[this.board[Math.floor(i / 8)][i % 8]] !== undefined) {
         let binary = "1" + this.boardBinary.substring(i + 1);
-        this.pieces[board[Math.floor(i / 8)][i % 8]] += BigInt(
+        this.pieces[this.board[Math.floor(i / 8)][i % 8]] += BigInt(
           parseInt(binary, 2)
         );
       }
@@ -108,6 +108,7 @@ class BitBoardData {
   }
 
   testing_white_pawn_moves() {
+    let solution=0n;
     const blacks_except_k =
       this.pieces["p"] |
       this.pieces["n"] |
@@ -128,12 +129,19 @@ class BitBoardData {
       this.pieces["Q"] |
       this.pieces["K"];
     const inverted_all_pieces = all_pieces ^ this.occupy;
-    let solution = 0n;
-    const right_capture = (pieces["P"] << 7n) & this.inverted_column_a & blacks_except_k; //this only calculate right side attacks
-    const left_capture = (pieces["P"] << 9n) & this.inverted_column_h & blacks_except_k; //this only calculate left side attacks
-    const one_cell_ahead = (pieces["P"] << 8n) & inverted_all_pieces; //advance one cell ahead
+    let list = "";
+    let right_capture = (this.pieces["P"] << 7n) & this.inverted_column_a & blacks_except_k; //this only calculate right side attacks
+    while(right_capture>0n){
+      let total_bits = (right_capture-1n).toString(2).split("").length;
+      let occ = BigInt(`0b${"1".repeat(total_bits)}`)
+      list+=`${Math.floor((total_bits/8)-1)}${(total_bits%8)+1}${Math.floor(total_bits/8)}${total_bits%8}`
+      right_capture=right_capture&((right_capture-1n)^occ); 
+    }
+    console.log(list);
+    const left_capture = (this.pieces["P"] << 9n) & this.inverted_column_h & blacks_except_k; //this only calculate left side attacks
+    const one_cell_ahead = (this.pieces["P"] << 8n) & inverted_all_pieces; //advance one cell ahead
     const two__cells_ahead =
-      (pieces["P"] << 16n) &
+      (this.pieces["P"] << 16n) &
       inverted_all_pieces &
       (inverted_all_pieces << 8n) &
       this.row_4; //advance two cells ahead from the second row
