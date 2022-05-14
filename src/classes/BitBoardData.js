@@ -13,6 +13,7 @@ class BitBoardData {
     ];
     this.boardBinary =
       "0000000000000000000000000000000000000000000000000000000000000000";
+    this.moves=[];
     this.pieces = {
       r: BigInt(0),
       n: BigInt(0),
@@ -128,10 +129,10 @@ class BitBoardData {
       this.pieces["K"];
     const inverted_all_pieces = all_pieces ^ this.occupy;
     let solution = 0n;
-    solution |= (pieces["P"] << 7n) & this.inverted_column_a & blacks_except_k; //this only calculate right side attacks
-    solution |= (pieces["P"] << 9n) & this.inverted_column_h & blacks_except_k; //this only calculate left side attacks
-    solution |= (pieces["P"] << 8n) & inverted_all_pieces; //advance one cell ahead
-    solution |=
+    const right_capture = (pieces["P"] << 7n) & this.inverted_column_a & blacks_except_k; //this only calculate right side attacks
+    const left_capture = (pieces["P"] << 9n) & this.inverted_column_h & blacks_except_k; //this only calculate left side attacks
+    const one_cell_ahead = (pieces["P"] << 8n) & inverted_all_pieces; //advance one cell ahead
+    const two__cells_ahead =
       (pieces["P"] << 16n) &
       inverted_all_pieces &
       (inverted_all_pieces << 8n) &
