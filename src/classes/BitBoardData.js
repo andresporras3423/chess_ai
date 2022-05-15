@@ -307,16 +307,17 @@ class BitBoardData {
         (this.pieces["K"] >> 9n)) &
       this.inverted_column_a;
     let moves_center = (this.pieces["K"] << 8n) | (this.pieces["K"] >> 8n);
-    let king_moves = (moves_left | moves_right | moves_center) & inverted_white_expect_k;
-    let list="";
+    let king_moves =
+      (moves_left | moves_right | moves_center) & inverted_white_expect_k;
+    let list = "";
     let king_index = this.pieces["K"].toString(2).split("").length - 1;
-    let king_row = Math.floor(king_index/8);
-    let king_column = Math.floor(king_index%8);
+    let king_row = Math.floor(king_index / 8);
+    let king_column = king_index % 8;
     while (king_moves > 0n) {
       let last_index = king_moves.toString(2).split("").length - 1;
-      list += `${king_row}${king_column}${Math.floor(
-        last_index / 8
-      )}${last_index % 8}`;
+      list += `${king_row}${king_column}${Math.floor(last_index / 8)}${
+        last_index % 8
+      }`;
       king_moves = king_moves ^ (1n << BigInt(last_index));
     }
     console.log(list);
@@ -342,16 +343,17 @@ class BitBoardData {
         (this.pieces["k"] >> 9n)) &
       this.inverted_column_a;
     let moves_center = (this.pieces["k"] << 8n) | (this.pieces["k"] >> 8n);
-    let king_moves = (moves_left | moves_right | moves_center) & inverted_black_expect_k;
-    let list="";
+    let king_moves =
+      (moves_left | moves_right | moves_center) & inverted_black_expect_k;
+    let list = "";
     let king_index = this.pieces["k"].toString(2).split("").length - 1;
-    let king_row = Math.floor(king_index/8);
-    let king_column = Math.floor(king_index%8);
+    let king_row = Math.floor(king_index / 8);
+    let king_column = king_index % 8;
     while (king_moves > 0n) {
       let last_index = king_moves.toString(2).split("").length - 1;
-      list += `${king_row}${king_column}${Math.floor(
-        last_index / 8
-      )}${last_index % 8}`;
+      list += `${king_row}${king_column}${Math.floor(last_index / 8)}${
+        last_index % 8
+      }`;
       king_moves = king_moves ^ (1n << BigInt(last_index));
     }
     console.log(list);
@@ -367,27 +369,42 @@ class BitBoardData {
       this.pieces["R"] |
       this.pieces["Q"];
     const inverted_white = white ^ this.occupy;
-    let moves_left_one_step =
-      ((this.pieces["N"] << 17n) | (this.pieces["N"] >> 15n)) &
-      this.inverted_column_h;
-    let moves_right_one_step =
-      ((this.pieces["N"] << 15n) | (this.pieces["N"] >> 17n)) &
-      this.inverted_column_a;
-    let moves_left_two_steps =
-      ((this.pieces["N"] << 10n) | (this.pieces["N"] >> 6n)) &
-      this.inverted_column_h &
-      this.inverted_column_g;
-    let moves_right_two_steps =
-      ((this.pieces["N"] << 6n) | (this.pieces["N"] >> 10n)) &
-      this.inverted_column_a &
-      this.inverted_column_b;
-    return (
-      (moves_left_one_step |
-        moves_right_one_step |
-        moves_left_two_steps |
-        moves_right_two_steps) &
-      inverted_white
-    );
+    let knights = this.pieces["N"];
+    let list = "";
+    while (knights > 0n) {
+      let last_index = knights.toString(2).split("").length - 1;
+      let last_knight = 1n << BigInt(last_index);
+      let moves_left_one_step =
+        ((last_knight << 17n) | (last_knight >> 15n)) & this.inverted_column_h;
+      let moves_right_one_step =
+        ((last_knight << 15n) | (last_knight >> 17n)) & this.inverted_column_a;
+      let moves_left_two_steps =
+        ((last_knight << 10n) | (last_knight >> 6n)) &
+        this.inverted_column_h &
+        this.inverted_column_g;
+      let moves_right_two_steps =
+        ((last_knight << 6n) | (last_knight >> 10n)) &
+        this.inverted_column_a &
+        this.inverted_column_b;
+      let knight_moves =
+        (moves_left_one_step |
+          moves_right_one_step |
+          moves_left_two_steps |
+          moves_right_two_steps) &
+        inverted_white;
+      let knight_row = Math.floor(last_index / 8);
+      let knight_column = last_index % 8;
+      while (knight_moves > 0n) {
+        let knight_index = knight_moves.toString(2).split("").length - 1;
+        list += `${knight_row}${knight_column}${Math.floor(knight_index / 8)}${
+          knight_index % 8
+        }`;
+        knight_moves = knight_moves ^ (1n << BigInt(knight_index));
+      }
+      knights = knights ^ last_knight;
+    }
+    console.log(list);
+    return list;
   }
 
   test_black_knight_moves() {
@@ -399,27 +416,45 @@ class BitBoardData {
       this.pieces["r"] |
       this.pieces["q"];
     const inverted_black = black ^ this.occupy;
-    let moves_left_one_step =
-      ((this.pieces["n"] << 17n) | (this.pieces["n"] >> 15n)) &
+    let knights = this.pieces["n"];
+    let list = "";
+    while (knights > 0n) {
+    let last_index = knights.toString(2).split("").length - 1;
+    let last_knight = 1n << BigInt(last_index);
+      let moves_left_one_step =
+      ((last_knight << 17n) | (last_knight >> 15n)) &
       this.inverted_column_h;
     let moves_right_one_step =
-      ((this.pieces["n"] << 15n) | (this.pieces["n"] >> 17n)) &
+      ((last_knight << 15n) | (last_knight >> 17n)) &
       this.inverted_column_a;
     let moves_left_two_steps =
-      ((this.pieces["n"] << 10n) | (this.pieces["n"] >> 6n)) &
+      ((last_knight << 10n) | (last_knight >> 6n)) &
       this.inverted_column_h &
       this.inverted_column_g;
     let moves_right_two_steps =
-      ((this.pieces["n"] << 6n) | (this.pieces["n"] >> 10n)) &
+      ((last_knight << 6n) | (last_knight >> 10n)) &
       this.inverted_column_a &
       this.inverted_column_b;
-    return (
+      let knight_moves = (
       (moves_left_one_step |
         moves_right_one_step |
         moves_left_two_steps |
         moves_right_two_steps) &
       inverted_black
     );
+    let knight_row = Math.floor(last_index / 8);
+    let knight_column = last_index % 8;
+    while (knight_moves > 0n) {
+      let knight_index = knight_moves.toString(2).split("").length - 1;
+      list += `${knight_row}${knight_column}${Math.floor(knight_index / 8)}${
+        knight_index % 8
+      }`;
+      knight_moves = knight_moves ^ (1n << BigInt(knight_index));
+    }
+    knights = knights ^ last_knight;
+    }
+    console.log(list);
+    return list;
   }
 
   cells_attacked_by_black() {
