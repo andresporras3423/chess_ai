@@ -135,30 +135,27 @@ class BitBoardData {
       (this.pieces["P"] << 7n) & this.inverted_column_a & blacks_except_k; //this only calculate right side attacks
     while (right_capture > 0n) {
       let last_index = right_capture.toString(2).split("").length - 1;
-      let occ = BigInt(`0b${"1".repeat(last_index + 1)}`);
       list += `${Math.floor(last_index / 8 - 1)}${
         (last_index % 8) + 1
       }${Math.floor(last_index / 8)}${last_index % 8}`;
-      right_capture = right_capture & (occ >> 1n);
+      right_capture = right_capture ^ (1n << BigInt(last_index));
     }
     let left_capture =
       (this.pieces["P"] << 9n) & this.inverted_column_h & blacks_except_k; //this only calculate left side attacks
     while (left_capture > 0n) {
       let last_index = left_capture.toString(2).split("").length - 1;
-      let occ = BigInt(`0b${"1".repeat(last_index + 1)}`);
       list += `${Math.floor(last_index / 8 - 1)}${
         (last_index % 8) - 1
       }${Math.floor(last_index / 8)}${last_index % 8}`;
-      left_capture = left_capture & (occ >> 1n);
+      left_capture = left_capture ^ (1n << BigInt(last_index));
     }
     let one_cell_ahead = (this.pieces["P"] << 8n) & inverted_all_pieces; //advance one cell ahead
     while (one_cell_ahead > 0n) {
       let last_index = one_cell_ahead.toString(2).split("").length - 1;
-      let occ = BigInt(`0b${"1".repeat(last_index + 1)}`);
       list += `${Math.floor(last_index / 8 - 1)}${last_index % 8}${Math.floor(
         last_index / 8
       )}${last_index % 8}`;
-      one_cell_ahead = one_cell_ahead & (occ >> 1n);
+      one_cell_ahead = one_cell_ahead ^ (1n << BigInt(last_index));
     }
     let two_cells_ahead =
       (this.pieces["P"] << 16n) &
@@ -171,7 +168,7 @@ class BitBoardData {
       list += `${Math.floor(last_index / 8 + 2)}${last_index % 8}${Math.floor(
         last_index / 8
       )}${last_index % 8}`;
-      two_cells_ahead = two_cells_ahead & (occ >> 1n);
+      two_cells_ahead = two_cells_ahead ^ (1n << BigInt(last_index));
     }
     // if last move was a black pawn that advanced two cells
     if (
@@ -199,6 +196,7 @@ class BitBoardData {
         }${Math.floor(last_index / 8)}${last_index % 8}`;
       }
     }
+    console.log(list);
     return list;
   }
 
@@ -228,30 +226,27 @@ class BitBoardData {
       (this.pieces["p"] >> 7n) & this.inverted_column_h & whites_except_k; //this only calculate right side attacks
     while (right_capture > 0n) {
       let last_index = right_capture.toString(2).split("").length - 1;
-      let occ = BigInt(`0b${"1".repeat(last_index + 1)}`);
       list += `${Math.floor(last_index / 8 + 1)}${
         (last_index % 8) - 1
       }${Math.floor(last_index / 8)}${last_index % 8}`;
-      right_capture = right_capture & (occ >> 1n);
+      right_capture = right_capture ^ (1n << BigInt(last_index));
     }
     let left_capture =
       (this.pieces["p"] >> 9n) & this.inverted_column_a & whites_except_k; //this only calculate left side attacks
     while (left_capture > 0n) {
       let last_index = left_capture.toString(2).split("").length - 1;
-      let occ = BigInt(`0b${"1".repeat(last_index + 1)}`);
       list += `${Math.floor(last_index / 8 + 1)}${
         (last_index % 8) + 1
       }${Math.floor(last_index / 8)}${last_index % 8}`;
-      left_capture = left_capture & (occ >> 1n);
+      left_capture = left_capture ^ (1n << BigInt(last_index));
     }
     let one_cell_ahead = (this.pieces["p"] >> 8n) & inverted_all_pieces; //advance one cell ahead
     while (one_cell_ahead > 0n) {
       let last_index = one_cell_ahead.toString(2).split("").length - 1;
-      let occ = BigInt(`0b${"1".repeat(last_index + 1)}`);
       list += `${Math.floor(last_index / 8 + 1)}${last_index % 8}${Math.floor(
         last_index / 8
       )}${last_index % 8}`;
-      one_cell_ahead = one_cell_ahead & (occ >> 1n);
+      one_cell_ahead = one_cell_ahead ^ (1n << BigInt(last_index));
     }
     let two_cells_ahead =
       (this.pieces["p"] >> 16n) &
@@ -260,11 +255,10 @@ class BitBoardData {
       this.row_5; //advance two cells ahead from the second row
     while (two_cells_ahead > 0n) {
       let last_index = two_cells_ahead.toString(2).split("").length - 1;
-      let occ = BigInt(`0b${"1".repeat(last_index + 1)}`);
       list += `${Math.floor(last_index / 8 + 2)}${last_index % 8}${Math.floor(
         last_index / 8
       )}${last_index % 8}`;
-      two_cells_ahead = two_cells_ahead & (occ >> 1n);
+      two_cells_ahead = two_cells_ahead ^ (1n << BigInt(last_index));
     }
     if (
       this.last_move["piece1"] === "P" &&
