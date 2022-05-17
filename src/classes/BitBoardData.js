@@ -3,12 +3,12 @@ class BitBoardData {
   constructor() {
     this.board = [
       [" ", "n", " ", " ", "k", " ", "n", " "],
-      [" ", "p", " ", "p", " ", "p", "p", "p"],
+      [" ", "p", " ", "P", " ", "p", "p", "p"],
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "],
       ["p", "P", "p", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", "p", "p", " ", " "],
-      ["P", " ", "P", "p", "P", "P", "P", "P"],
+      ["P", " ", "P", " ", "P", "P", "P", "P"],
       [" ", "N", " ", " ", "K", " ", "N", " "],
     ];
     this.boardBinary =
@@ -148,18 +148,30 @@ class BitBoardData {
       (this.pieces["P"] << 9n) & this.inverted_column_h & blacks; //this only calculate left side attacks
     while (left_capture > 0n) {
       let last_index = left_capture.toString(2).split("").length - 1;
-      list += `${Math.floor(last_index / 8 - 1)}${
-        (last_index % 8) - 1
-      }${Math.floor(last_index / 8)}${last_index % 8}`;
-      left_capture = left_capture ^ (1n << BigInt(last_index));
+      let last_pawn = 1n << BigInt(last_index);
+      this.pieces["P"] = this.pieces["P"] + last_pawn - (last_pawn>>9n);
+      let is_check = this.white_king_check();
+      this.pieces["P"] = this.pieces["P"] - last_pawn + (last_pawn>>9n);
+      if(!is_check){
+        list += `${Math.floor(last_index / 8 - 1)}${
+          (last_index % 8) - 1
+        }${Math.floor(last_index / 8)}${last_index % 8}`;
+      }
+      left_capture = left_capture ^ last_pawn;
     }
     let one_cell_ahead = (this.pieces["P"] << 8n) & inverted_all_pieces; //advance one cell ahead
     while (one_cell_ahead > 0n) {
       let last_index = one_cell_ahead.toString(2).split("").length - 1;
-      list += `${Math.floor(last_index / 8 - 1)}${last_index % 8}${Math.floor(
-        last_index / 8
-      )}${last_index % 8}`;
-      one_cell_ahead = one_cell_ahead ^ (1n << BigInt(last_index));
+      let last_pawn = 1n << BigInt(last_index);
+      this.pieces["P"] = this.pieces["P"] + last_pawn - (last_pawn>>8n);
+      let is_check = this.white_king_check();
+      this.pieces["P"] = this.pieces["P"] - last_pawn + (last_pawn>>8n);
+      if(!is_check){
+        list += `${Math.floor(last_index / 8 - 1)}${last_index % 8}${Math.floor(
+          last_index / 8
+        )}${last_index % 8}`;
+      }
+      one_cell_ahead = one_cell_ahead ^ last_pawn;
     }
     let two_cells_ahead =
       (this.pieces["P"] << 16n) &
@@ -168,11 +180,16 @@ class BitBoardData {
       this.row_4; //advance two cells ahead from the second row
     while (two_cells_ahead > 0n) {
       let last_index = two_cells_ahead.toString(2).split("").length - 1;
-      let occ = BigInt(`0b${"1".repeat(last_index + 1)}`);
-      list += `${Math.floor(last_index / 8 + 2)}${last_index % 8}${Math.floor(
-        last_index / 8
-      )}${last_index % 8}`;
-      two_cells_ahead = two_cells_ahead ^ (1n << BigInt(last_index));
+      let last_pawn = 1n << BigInt(last_index);
+      this.pieces["P"] = this.pieces["P"] + last_pawn - (last_pawn>>16n);
+      let is_check = this.white_king_check();
+      this.pieces["P"] = this.pieces["P"] - last_pawn + (last_pawn>>16n);
+      if(!is_check){
+        list += `${Math.floor(last_index / 8 + 2)}${last_index % 8}${Math.floor(
+          last_index / 8
+        )}${last_index % 8}`;
+      }
+      two_cells_ahead = two_cells_ahead ^ last_pawn;
     }
     // if last move was a black pawn that advanced two cells
     if (
@@ -185,9 +202,15 @@ class BitBoardData {
         (this.last_move["position2"] << 8n); // left capture in en passant
       if (left_en_passant > 0n) {
         let last_index = left_en_passant.toString(2).split("").length - 1;
-        list += `${Math.floor(last_index / 8 - 1)}${
-          (last_index % 8) - 1
-        }${Math.floor(last_index / 8)}${last_index % 8}`;
+        let last_pawn = 1n << BigInt(last_index);
+        this.pieces["P"] = this.pieces["P"] + last_pawn - (last_pawn>>9n);
+        let is_check = this.white_king_check();
+        this.pieces["P"] = this.pieces["P"] - last_pawn + (last_pawn>>9n);
+        if(!is_check){
+          list += `${Math.floor(last_index / 8 - 1)}${
+            (last_index % 8) - 1
+          }${Math.floor(last_index / 8)}${last_index % 8}`;
+        }
       }
       let right_en_passant =
         (this.pieces["P"] << 7n) &
@@ -195,9 +218,15 @@ class BitBoardData {
         (this.last_move["position2"] << 8n); // right capture in en passant
       if (right_en_passant > 0n) {
         let last_index = right_en_passant.toString(2).split("").length - 1;
-        list += `${Math.floor(last_index / 8 - 1)}${
-          (last_index % 8) + 1
-        }${Math.floor(last_index / 8)}${last_index % 8}`;
+        let last_pawn = 1n << BigInt(last_index);
+        this.pieces["P"] = this.pieces["P"] + last_pawn - (last_pawn>>7n);
+        let is_check = this.white_king_check();
+        this.pieces["P"] = this.pieces["P"] - last_pawn + (last_pawn>>7n);
+        if(!is_check){
+          list += `${Math.floor(last_index / 8 - 1)}${
+            (last_index % 8) + 1
+          }${Math.floor(last_index / 8)}${last_index % 8}`;
+        }
       }
     }
     return list;
@@ -229,27 +258,45 @@ class BitBoardData {
       (this.pieces["p"] >> 7n) & this.inverted_column_h & whites_except_k; //this only calculate right side attacks
     while (right_capture > 0n) {
       let last_index = right_capture.toString(2).split("").length - 1;
-      list += `${Math.floor(last_index / 8 + 1)}${
-        (last_index % 8) - 1
-      }${Math.floor(last_index / 8)}${last_index % 8}`;
-      right_capture = right_capture ^ (1n << BigInt(last_index));
+      let last_pawn = 1n << BigInt(last_index);
+      this.pieces["p"] = this.pieces["p"] + last_pawn - (last_pawn<<7n);
+      let is_check = this.black_king_check();
+      this.pieces["p"] = this.pieces["p"] - last_pawn + (last_pawn<<7n);
+      if(!is_check){
+        list += `${Math.floor(last_index / 8 + 1)}${
+          (last_index % 8) - 1
+        }${Math.floor(last_index / 8)}${last_index % 8}`;
+      }
+      right_capture = right_capture ^ last_pawn;
     }
     let left_capture =
       (this.pieces["p"] >> 9n) & this.inverted_column_a & whites_except_k; //this only calculate left side attacks
     while (left_capture > 0n) {
       let last_index = left_capture.toString(2).split("").length - 1;
-      list += `${Math.floor(last_index / 8 + 1)}${
-        (last_index % 8) + 1
-      }${Math.floor(last_index / 8)}${last_index % 8}`;
-      left_capture = left_capture ^ (1n << BigInt(last_index));
+      let last_pawn = 1n << BigInt(last_index);
+      this.pieces["p"] = this.pieces["p"] + last_pawn - (last_pawn<<9n);
+      let is_check = this.black_king_check();
+      this.pieces["p"] = this.pieces["p"] - last_pawn + (last_pawn<<9n);
+      if(!is_check){
+        list += `${Math.floor(last_index / 8 + 1)}${
+          (last_index % 8) + 1
+        }${Math.floor(last_index / 8)}${last_index % 8}`;
+      }
+      left_capture = left_capture ^ last_pawn;
     }
     let one_cell_ahead = (this.pieces["p"] >> 8n) & inverted_all_pieces; //advance one cell ahead
     while (one_cell_ahead > 0n) {
       let last_index = one_cell_ahead.toString(2).split("").length - 1;
+      let last_pawn = 1n << BigInt(last_index);
+      this.pieces["p"] = this.pieces["p"] + last_pawn - (last_pawn<<8n);
+      let is_check = this.black_king_check();
+      this.pieces["p"] = this.pieces["p"] - last_pawn + (last_pawn<<8n);
+      if(!is_check){
       list += `${Math.floor(last_index / 8 + 1)}${last_index % 8}${Math.floor(
         last_index / 8
       )}${last_index % 8}`;
-      one_cell_ahead = one_cell_ahead ^ (1n << BigInt(last_index));
+      }
+      one_cell_ahead = one_cell_ahead ^ last_pawn;
     }
     let two_cells_ahead =
       (this.pieces["p"] >> 16n) &
@@ -258,10 +305,16 @@ class BitBoardData {
       this.row_5; //advance two cells ahead from the second row
     while (two_cells_ahead > 0n) {
       let last_index = two_cells_ahead.toString(2).split("").length - 1;
-      list += `${Math.floor(last_index / 8 + 2)}${last_index % 8}${Math.floor(
-        last_index / 8
-      )}${last_index % 8}`;
-      two_cells_ahead = two_cells_ahead ^ (1n << BigInt(last_index));
+      let last_pawn = 1n << BigInt(last_index);
+      this.pieces["p"] = this.pieces["p"] + last_pawn - (last_pawn<<16n);
+      let is_check = this.black_king_check();
+      this.pieces["p"] = this.pieces["p"] - last_pawn + (last_pawn<<16n);
+      if(!is_check){
+        list += `${Math.floor(last_index / 8 + 2)}${last_index % 8}${Math.floor(
+          last_index / 8
+        )}${last_index % 8}`;
+      }
+      two_cells_ahead = two_cells_ahead ^ last_pawn;
     }
     if (
       this.last_move["piece1"] === "P" &&
@@ -274,9 +327,15 @@ class BitBoardData {
         (this.last_move["position2"] >> 8n); // left capture in en passant
       if (left_en_passant > 0n) {
         let last_index = left_en_passant.toString(2).split("").length - 1;
-        list += `${Math.floor(last_index / 8 + 1)}${
-          (last_index % 8) + 1
-        }${Math.floor(last_index / 8)}${last_index % 8}`;
+        let last_pawn = 1n << BigInt(last_index);
+        this.pieces["p"] = this.pieces["p"] + last_pawn - (last_pawn<<9n);
+        let is_check = this.black_king_check();
+        this.pieces["p"] = this.pieces["p"] - last_pawn + (last_pawn<<9n);
+        if(!is_check){
+          list += `${Math.floor(last_index / 8 + 1)}${
+            (last_index % 8) + 1
+          }${Math.floor(last_index / 8)}${last_index % 8}`;
+        }
       }
       let right_en_passant =
         (this.pieces["p"] >> 7n) &
@@ -284,9 +343,15 @@ class BitBoardData {
         (this.last_move["position2"] >> 8n); // right capture in en passant
       if (right_en_passant > 0n) {
         let last_index = right_en_passant.toString(2).split("").length - 1;
-        list += `${Math.floor(last_index / 8 + 1)}${
-          (last_index % 8) - 1
-        }${Math.floor(last_index / 8)}${last_index % 8}`;
+        let last_pawn = 1n << BigInt(last_index);
+        this.pieces["p"] = this.pieces["p"] + last_pawn - (last_pawn<<7n);
+        let is_check = this.black_king_check();
+        this.pieces["p"] = this.pieces["p"] - last_pawn + (last_pawn<<7n);
+        if(!is_check){
+          list += `${Math.floor(last_index / 8 + 1)}${
+            (last_index % 8) - 1
+          }${Math.floor(last_index / 8)}${last_index % 8}`;
+        }
       }
     }
     return list;
@@ -482,7 +547,7 @@ class BitBoardData {
     return false;
   }
 
-  black_Moves() {
+  black_moves() {
     return (
       this.test_black_knight_moves() + this.test_black_king_moves() + this.testing_black_pawn_moves()
     );
