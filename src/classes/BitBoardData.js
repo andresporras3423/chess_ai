@@ -7,8 +7,8 @@ class BitBoardData {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "],
       ["p", "P", "p", " ", " ", " ", " ", " "],
-      [" ", " ", " ", " ", "p", " ", " ", " "],
-      ["P", " ", "P", "P", "P", "P", "P", "P"],
+      [" ", " ", " ", " ", "p", "p", " ", " "],
+      ["P", " ", "P", "p", "P", "P", "P", "P"],
       [" ", "N", " ", " ", "K", " ", "N", " "],
     ];
     this.boardBinary =
@@ -108,7 +108,7 @@ class BitBoardData {
   }
 
   testing_white_pawn_moves() {
-    const blacks_except_k =
+    const blacks =
       this.pieces["p"] |
       this.pieces["n"] |
       this.pieces["b"] |
@@ -130,16 +130,22 @@ class BitBoardData {
     const inverted_all_pieces = all_pieces ^ this.occupy;
     let list = "";
     let right_capture =
-      (this.pieces["P"] << 7n) & this.inverted_column_a & blacks_except_k; //this only calculate right side attacks
+      (this.pieces["P"] << 7n) & this.inverted_column_a & blacks; //this only calculate right side attacks
     while (right_capture > 0n) {
       let last_index = right_capture.toString(2).split("").length - 1;
-      list += `${Math.floor(last_index / 8 - 1)}${
-        (last_index % 8) + 1
-      }${Math.floor(last_index / 8)}${last_index % 8}`;
-      right_capture = right_capture ^ (1n << BigInt(last_index));
+      let last_pawn = 1n << BigInt(last_index);
+      this.pieces["P"] = this.pieces["P"] + last_pawn - (last_pawn>>7n);
+      let is_check = this.white_king_check();
+      this.pieces["P"] = this.pieces["P"] - last_pawn + (last_pawn>>7n);
+      if(!is_check){
+        list += `${Math.floor(last_index / 8 - 1)}${
+          (last_index % 8) + 1
+        }${Math.floor(last_index / 8)}${last_index % 8}`;
+      }
+      right_capture = right_capture ^ last_pawn;
     }
     let left_capture =
-      (this.pieces["P"] << 9n) & this.inverted_column_h & blacks_except_k; //this only calculate left side attacks
+      (this.pieces["P"] << 9n) & this.inverted_column_h & blacks; //this only calculate left side attacks
     while (left_capture > 0n) {
       let last_index = left_capture.toString(2).split("").length - 1;
       list += `${Math.floor(last_index / 8 - 1)}${
@@ -194,7 +200,6 @@ class BitBoardData {
         }${Math.floor(last_index / 8)}${last_index % 8}`;
       }
     }
-    console.log(list);
     return list;
   }
 
@@ -284,7 +289,6 @@ class BitBoardData {
         }${Math.floor(last_index / 8)}${last_index % 8}`;
       }
     }
-    console.log(list);
     return list;
   }
 
@@ -320,7 +324,6 @@ class BitBoardData {
       }`;
       king_moves = king_moves ^ (1n << BigInt(last_index));
     }
-    console.log(list);
     return list;
   }
 
@@ -356,7 +359,6 @@ class BitBoardData {
       }`;
       king_moves = king_moves ^ (1n << BigInt(last_index));
     }
-    console.log(list);
     return list;
   }
 
@@ -403,7 +405,6 @@ class BitBoardData {
       }
       knights = knights ^ last_knight;
     }
-    console.log(list);
     return list;
   }
 
@@ -450,23 +451,46 @@ class BitBoardData {
       }
       knights = knights ^ last_knight;
     }
-    console.log(list);
     return list;
   }
 
-  cells_attacked_by_black() {
+  white_king_check(){
+    if(((this.pieces["p"]>>7n)&this.pieces["K"]&this.inverted_column_h)>0n) return true;
+    if(((this.pieces["p"]>>9n)&this.pieces["K"]&this.inverted_column_a)>0n) return true;
+    if(((this.pieces["n"]<<17n)&this.pieces["K"]&this.inverted_column_h)>0n) return true;
+    if(((this.pieces["n"]>>15n)&this.pieces["K"]&this.inverted_column_h)>0n) return true;
+    if(((this.pieces["n"]>>17n)&this.pieces["K"]&this.inverted_column_a)>0n) return true;
+    if(((this.pieces["n"]<<15n)&this.pieces["K"]&this.inverted_column_a)>0n) return true;
+    if(((this.pieces["n"]<<10n)&this.pieces["K"]&this.inverted_column_g&this.inverted_column_h)>0n) return true;
+    if(((this.pieces["n"]>>6n)&this.pieces["K"]&this.inverted_column_g&this.inverted_column_h)>0n) return true;
+    if(((this.pieces["n"]>>10n)&this.pieces["K"]&this.inverted_column_a&this.inverted_column_b)>0n) return true;
+    if(((this.pieces["n"]<<6n)&this.pieces["K"]&this.inverted_column_a&this.inverted_column_b)>0n) return true;
+    return false;
+  }
+
+  black_king_check(){
+    if(((this.pieces["P"]<<7n)&this.pieces["k"]&this.inverted_column_a)>0n) return true;
+    if(((this.pieces["P"]<<9n)&this.pieces["k"]&this.inverted_column_h)>0n) return true;
+    if(((this.pieces["N"]<<17n)&this.pieces["k"]&this.inverted_column_h)>0n) return true;
+    if(((this.pieces["N"]>>15n)&this.pieces["k"]&this.inverted_column_h)>0n) return true;
+    if(((this.pieces["N"]>>17n)&this.pieces["k"]&this.inverted_column_a)>0n) return true;
+    if(((this.pieces["N"]<<15n)&this.pieces["k"]&this.inverted_column_a)>0n) return true;
+    if(((this.pieces["N"]<<10n)&this.pieces["k"]&this.inverted_column_g&this.inverted_column_h)>0n) return true;
+    if(((this.pieces["N"]>>6n)&this.pieces["k"]&this.inverted_column_g&this.inverted_column_h)>0n) return true;
+    if(((this.pieces["N"]>>10n)&this.pieces["k"]&this.inverted_column_a&this.inverted_column_b)>0n) return true;
+    if(((this.pieces["N"]<<6n)&this.pieces["k"]&this.inverted_column_a&this.inverted_column_b)>0n) return true;
+    return false;
+  }
+
+  black_Moves() {
     return (
-      this.test_black_knight_moves() |
-      this.test_black_king_moves() |
-      this.testing_black_pawn_moves()
+      this.test_black_knight_moves() + this.test_black_king_moves() + this.testing_black_pawn_moves()
     );
   }
 
-  cells_attacked_by_white() {
+  white_moves() {
     return (
-      this.test_white_knight_moves() |
-      this.test_white_king_moves() |
-      this.testing_white_pawn_moves()
+      this.test_white_knight_moves() + this.test_white_king_moves() + this.testing_white_pawn_moves()
     );
   }
 }
