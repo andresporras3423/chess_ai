@@ -1,4 +1,4 @@
 import BitBoardData from "./BitBoardData.js";
 
 let b = new BitBoardData();
-console.log(b.black_moves());
+console.log(b.test_black_king_moves());
