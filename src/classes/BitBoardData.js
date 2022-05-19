@@ -2,13 +2,13 @@
 class BitBoardData {
   constructor() {
     this.board = [
-      [" ", "n", " ", " ", "k", " ", "n", " "],
-      [" ", "p", " ", "p", " ", "p", "p", "p"],
-      [" ", " ", " ", " ", " ", "N", " ", " "],
+      [" ", "n", " ", " ", " ", " ", "n", " "],
+      [" ", "p", " ", " ", " ", "p", "p", "p"],
       [" ", " ", " ", " ", " ", " ", " ", " "],
-      ["p", "P", "p", " ", " ", " ", " ", " "],
+      [" ", " ", " ", " ", "k", " ", " ", " "],
+      ["p", "P", " ", "P", "p", " ", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "],
-      ["P", " ", "P", " ", "P", "P", "P", "P"],
+      ["P", " ", " ", " ", "P", "P", "P", "P"],
       [" ", "N", " ", " ", "K", " ", "N", " "],
     ];
     this.boardBinary =
@@ -58,9 +58,9 @@ class BitBoardData {
     );
     this.last_move = {
       piece1: "P",
-      position1: BigInt("0b100000000000000"),
+      position1: BigInt("0b1000000000000"),
       piece2: "P",
-      position2: BigInt("0b1000000000000000000000000000000"),
+      position2: BigInt("0b10000000000000000000000000000"),
     };
   }
 
@@ -203,8 +203,10 @@ class BitBoardData {
       if (left_en_passant > 0n) {
         let last_index = left_en_passant.toString(2).split("").length - 1;
         let last_pawn = 1n << BigInt(last_index);
+        this.pieces["p"] = this.pieces["p"] - this.last_move["position2"];
         this.pieces["P"] = this.pieces["P"] + last_pawn - (last_pawn>>9n);
         let is_check = this.white_king_check();
+        this.pieces["p"] = this.pieces["p"] + this.last_move["position2"];
         this.pieces["P"] = this.pieces["P"] - last_pawn + (last_pawn>>9n);
         if(!is_check){
           list += `${Math.floor(last_index / 8 - 1)}${
@@ -219,8 +221,10 @@ class BitBoardData {
       if (right_en_passant > 0n) {
         let last_index = right_en_passant.toString(2).split("").length - 1;
         let last_pawn = 1n << BigInt(last_index);
+        this.pieces["p"] = this.pieces["p"] - this.last_move["position2"];
         this.pieces["P"] = this.pieces["P"] + last_pawn - (last_pawn>>7n);
         let is_check = this.white_king_check();
+        this.pieces["p"] = this.pieces["p"] + this.last_move["position2"];
         this.pieces["P"] = this.pieces["P"] - last_pawn + (last_pawn>>7n);
         if(!is_check){
           list += `${Math.floor(last_index / 8 - 1)}${
@@ -328,8 +332,10 @@ class BitBoardData {
       if (left_en_passant > 0n) {
         let last_index = left_en_passant.toString(2).split("").length - 1;
         let last_pawn = 1n << BigInt(last_index);
+        this.pieces["P"] = this.pieces["P"] - this.last_move["position2"];
         this.pieces["p"] = this.pieces["p"] + last_pawn - (last_pawn<<9n);
         let is_check = this.black_king_check();
+        this.pieces["P"] = this.pieces["P"] + this.last_move["position2"];
         this.pieces["p"] = this.pieces["p"] - last_pawn + (last_pawn<<9n);
         if(!is_check){
           list += `${Math.floor(last_index / 8 + 1)}${
@@ -344,8 +350,10 @@ class BitBoardData {
       if (right_en_passant > 0n) {
         let last_index = right_en_passant.toString(2).split("").length - 1;
         let last_pawn = 1n << BigInt(last_index);
+        this.pieces["P"] = this.pieces["P"] - this.last_move["position2"];
         this.pieces["p"] = this.pieces["p"] + last_pawn - (last_pawn<<7n);
         let is_check = this.black_king_check();
+        this.pieces["P"] = this.pieces["P"] + this.last_move["position2"];
         this.pieces["p"] = this.pieces["p"] - last_pawn + (last_pawn<<7n);
         if(!is_check){
           list += `${Math.floor(last_index / 8 + 1)}${
@@ -385,8 +393,8 @@ class BitBoardData {
     let king_column = king_index % 8;
     while (king_moves > 0n) {
       let last_index = king_moves.toString(2).split("").length - 1;
-      let last_pawn = 1n << BigInt(last_index);
-      this.pieces["K"] = last_pawn;
+      let last_move = 1n << BigInt(last_index);
+      this.pieces["K"] = last_move;
       let is_check = this.white_king_check();
       this.pieces["K"] = king_origin;
       if(!is_check){
@@ -394,7 +402,7 @@ class BitBoardData {
           last_index % 8
         }`;
       }
-      king_moves = king_moves ^ last_pawn;
+      king_moves = king_moves ^ last_move;
     }
     return list;
   }
@@ -427,8 +435,8 @@ class BitBoardData {
     let king_column = king_index % 8;
     while (king_moves > 0n) {
       let last_index = king_moves.toString(2).split("").length - 1;
-      let last_pawn = 1n << BigInt(last_index);
-      this.pieces["k"] = last_pawn;
+      let last_move = 1n << BigInt(last_index);
+      this.pieces["k"] = last_move;
       let is_check = this.black_king_check();
       this.pieces["k"] = king_origin;
       if(!is_check){
@@ -436,7 +444,7 @@ class BitBoardData {
           last_index % 8
         }`;
       }
-      king_moves = king_moves ^ last_pawn;
+      king_moves = king_moves ^ last_move;
     }
     return list;
   }
