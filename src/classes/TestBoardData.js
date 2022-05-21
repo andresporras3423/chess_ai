@@ -1,7 +1,7 @@
 import BitBoardData from "./BitBoardData.js";
 
 let b = new BitBoardData();
-console.log(b.white_moves());
+console.log(b.testing_white_rock_moves());
 
 function coord(num){
   let index = num.toString(2).split("").length - 1;
@@ -32,4 +32,4 @@ function rotate180 (x) {
   return mirrorHorizontal (flipVertical (x) );
 }
 
-console.log(rotate180(BigInt("0b1111111100000000000000000000000000000000000000000000000000000000")).toString(2))
+// console.log(rotate180(BigInt("0b1111111100000000000000000000000000000000000000000000000000000000")).toString(2))

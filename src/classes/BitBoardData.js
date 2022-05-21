@@ -7,9 +7,9 @@ class BitBoardData {
       [" ", " ", " ", " ", " ", " ", " ", " "],
       [" ", " ", " ", " ", "", " ", " ", " "],
       ["p", "P", " ", "P", " ", " ", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
+      [" ", " ", " ", "R", " ", " ", " ", " "],
       ["P", " ", "p", " ", "P", "P", "P", "P"],
-      [" ", "N", " ", " ", "K", " ", "N", " "],
+      [" ", "N", " ", " ", "K", " ", "N", "R"],
     ];
     this.boardBinary =
       "0000000000000000000000000000000000000000000000000000000000000000";
@@ -536,6 +536,15 @@ class BitBoardData {
         knight_moves = knight_moves ^ last_move;
       }
       knights = knights ^ last_knight;
+    }
+  }
+
+  testing_white_rock_moves(){
+    let rocks = this.pieces["R"];
+    while(rocks>0){
+      let first = rocks&((rocks-1n)^this.occupy); 
+      console.log(first);
+      rocks = rocks - first;
     }
   }
 
