@@ -116,37 +116,6 @@ function testing_black_pawn_moves(){
   return solution;
 }
 
-function testing_white_rock_moves(){
-  let pieces = generate_boards();
-  let occ = "11001010";
-  let slid = "00001000";
-  const all_row = BigInt("0b11111111"); // just number 1
-  const row_unit = BigInt("0b00000001"); // just number 1
-  let occupied = BigInt(`0b${occ}`); // this represents all the pieces present in a row
-  let slider = BigInt(`0b${slid}`); // this represent rock piece in the row
-  let remove_slider = occupied-slider;
-  let right_direction= 0n;
-  if(slider>remove_slider){ //it happens when there no pieces left side the rock
-    right_direction = all_row-((slider<<1n)-row_unit);
-  }else{
-    right_direction= occupied^(occupied-slider-slider);
-  }
-  // from here calculate possible moves to right direction
-  let rev_occupied = BigInt(`0b${occ.split("").reverse().join("")}`)
-  let rev_slider = BigInt(`0b${slid.split("").reverse().join("")}`)
-  let rev_remove_slider = rev_occupied-rev_slider;
-  let left_direction= 0n;
-  if(rev_slider>rev_remove_slider){ //it happens when there no pieces left side the rock
-    let sol = (all_row-(all_row-((rev_slider<<1n)-row_unit)));
-    left_direction=BigInt(`0b${sol.toString(2).split("").reverse().map(x=> x==="0" ? "1" : "0").join("")}`)
-  }else{
-    let sol = (all_row-(rev_occupied^(rev_occupied-rev_slider-rev_slider)));
-    left_direction=BigInt(`0b${sol.toString(2).split("").reverse().map(x=> x==="0" ? "1" : "0").join("")}`)
-  }
-  console.log((right_direction+left_direction).toString(2))
-  //console.log(((BigInt("0b10100001") >> 2n)|(BigInt("0b10100001") << 6n)).toString(2));
-}
-
 function test_white_king_moves(){
   let pieces = generate_boards();
   const white_except_k = pieces["P"]|pieces["N"]|pieces["B"]|pieces["R"]|pieces["Q"];

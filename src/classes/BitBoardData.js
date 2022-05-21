@@ -610,6 +610,15 @@ class BitBoardData {
     }
   }
 
+  rotate_90_degrees(board){
+    let str_board = board.toString(2).split("");
+    let sol = ["","","","","","","",""];
+    for(let i=0; i<str_board.length; i++){
+      sol[i%8]+=str_board[i];
+    }
+    return sol.join("");
+  }
+
   black_moves() {
       this.clear_moves();
       this.test_black_knight_moves();
