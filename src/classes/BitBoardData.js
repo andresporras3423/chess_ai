@@ -3,9 +3,9 @@ class BitBoardData {
   constructor() {
     this.board = [
       [" ", "n", "r", " ", "k", " ", "n", " "],
-      ["P", "p", " ", " ", " ", "p", "p", "p"],
-      [" ", " ", " ", "r", " ", " ", " ", " "],
-      [" ", " ", " ", " ", "", " ", " ", " "],
+      ["P", "p", " ", "p", " ", " ", "p", "p"],
+      [" ", " ", " ", "r", " ", "P", " ", " "],
+      [" ", " ", " ", " ", " ", " ", " ", " "],
       ["p", "P", " ", "p", " ", " ", " ", " "],
       [" ", " ", " ", "R", " ", " ", " ", " "],
       ["P", " ", "p", " ", "P", "P", "P", "P"],
@@ -64,9 +64,31 @@ class BitBoardData {
     this.inverted_column_g = this.occupy ^ this.column_g;
     this.inverted_column_b = this.occupy ^ this.column_b;
     this.inverted_column_a = this.occupy ^ this.column_a;
+    this.rows = [
+    BigInt("0b0000000000000000000000000000000000000000000000000000000011111111"),
+    BigInt("0b0000000000000000000000000000000000000000000000001111111100000000"),
+    BigInt("0b0000000000000000000000000000000000000000111111110000000000000000"),
+    BigInt("0b0000000000000000000000000000000011111111000000000000000000000000"),
+    BigInt("0b0000000000000000000000001111111100000000000000000000000000000000"),
+    BigInt("0b0000000000000000111111110000000000000000000000000000000000000000"),
+    BigInt("0b0000000011111111000000000000000000000000000000000000000000000000"),
+    BigInt("0b1111111100000000000000000000000000000000000000000000000000000000")
+    ]
+    this.columns = [
+      BigInt("0b0000000100000001000000010000000100000001000000010000000100000001"),
+      BigInt("0b0000001000000010000000100000001000000010000000100000001000000010"),
+      BigInt("0b0000010000000100000001000000010000000100000001000000010000000100"),
+      BigInt("0b0000100000001000000010000000100000001000000010000000100000001000"),
+      BigInt("0b0001000000010000000100000001000000010000000100000001000000010000"),
+      BigInt("0b0010000000100000001000000010000000100000001000000010000000100000"),
+      BigInt("0b0100000001000000010000000100000001000000010000000100000001000000"),
+      BigInt("0b1000000010000000100000001000000010000000100000001000000010000000")
+    ]
     this.row_5 = BigInt(
       "0b0000000000000000000000001111111100000000000000000000000000000000"
     );
+    this.reverse_rows = this.rows.map(r=> r^this.occupy);
+    this.reverse_columns = this.columns.map(c=> c^this.occupy);
     this.row_4 = BigInt(
       "0b0000000000000000000000000000000011111111000000000000000000000000"
     );
@@ -562,25 +584,29 @@ class BitBoardData {
       this.pieces["Q"] |
       this.pieces["K"];
 
-      let reverse_all_pieces = this.rotate180(all_pieces);
     let rocks = this.pieces["R"];
     while(rocks>0){
       let first = rocks&((rocks-1n)^this.occupy); // get first rock from avaiable rocks
-      let temp_pieces = all_pieces - first;
+      let first_index = first.toString(2).length-1;
+      let mask = (this.rows[Math.floor(first_index / 8)]|this.columns[first_index % 8])
+      let temp_pieces = (all_pieces&mask) - first;
       let right_direction= 0n;
       if(first>temp_pieces){ //it happens when there no pieces left side the rock
         right_direction = this.occupy-((first<<1n)-1n);
       }else{
         right_direction= temp_pieces^(temp_pieces-first-first);
       }
+      right_direction= right_direction&mask;
+      let reverse_mask = this.rotate180(mask);
       let reverse_first = this.rotate180(first);
-      let temp_reverse_pieces = reverse_all_pieces - reverse_first;
+      let temp_reverse_pieces = this.rotate180(temp_pieces);
       let left_direction = 0n;
       if(reverse_first>temp_reverse_pieces){ //it happens when there no pieces left side the rock
         left_direction = this.occupy-((reverse_first<<1n)-1n);
       }else{
         left_direction= temp_reverse_pieces^(temp_reverse_pieces-reverse_first-reverse_first);
       }
+      left_direction = left_direction&reverse_mask;
       let rock_moves = right_direction|this.rotate180(left_direction);
       rock_moves = rock_moves & (white_pieces^this.occupy);
       console.log(rock_moves.toString(2));
@@ -615,21 +641,26 @@ class BitBoardData {
     let rocks = this.pieces["r"];
     while(rocks>0){
       let first = rocks&((rocks-1n)^this.occupy); // get first rock from avaiable rocks
-      let temp_pieces = all_pieces - first;
+      let first_index = first.toString(2).length-1;
+      let mask = (this.rows[Math.floor(first_index / 8)]|this.columns[first_index % 8])
+      let temp_pieces = (all_pieces&mask) - first;
       let right_direction= 0n;
       if(first>temp_pieces){ //it happens when there no pieces left side the rock
         right_direction = this.occupy-((first<<1n)-1n);
       }else{
         right_direction= temp_pieces^(temp_pieces-first-first);
       }
+      right_direction= right_direction&mask;
+      let reverse_mask = this.rotate180(mask);
       let reverse_first = this.rotate180(first);
-      let temp_reverse_pieces = reverse_all_pieces - reverse_first;
+      let temp_reverse_pieces = this.rotate180(temp_pieces);
       let left_direction = 0n;
       if(reverse_first>temp_reverse_pieces){ //it happens when there no pieces left side the rock
         left_direction = this.occupy-((reverse_first<<1n)-1n);
       }else{
         left_direction= temp_reverse_pieces^(temp_reverse_pieces-reverse_first-reverse_first);
       }
+      left_direction = left_direction&reverse_mask;
       let rock_moves = right_direction|this.rotate180(left_direction);
       rock_moves = rock_moves & (black_pieces^this.occupy);
       console.log(rock_moves.toString(2));
