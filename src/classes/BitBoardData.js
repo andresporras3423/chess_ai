@@ -2,11 +2,11 @@
 class BitBoardData {
   constructor() {
     this.board = [
-      [" ", "n", " ", " ", "k", " ", "n", " "],
+      [" ", "n", "r", " ", "k", " ", "n", " "],
       ["P", "p", " ", " ", " ", "p", "p", "p"],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
+      [" ", " ", " ", "r", " ", " ", " ", " "],
       [" ", " ", " ", " ", "", " ", " ", " "],
-      ["p", "P", " ", "P", " ", " ", " ", " "],
+      ["p", "P", " ", "p", " ", " ", " ", " "],
       [" ", " ", " ", "R", " ", " ", " ", " "],
       ["P", " ", "p", " ", "P", "P", "P", "P"],
       [" ", "N", " ", " ", "K", " ", "N", "R"],
@@ -540,11 +540,100 @@ class BitBoardData {
   }
 
   testing_white_rock_moves(){
+    const all_pieces =
+      this.pieces["p"] |
+      this.pieces["n"] |
+      this.pieces["b"] |
+      this.pieces["r"] |
+      this.pieces["q"] |
+      this.pieces["k"] |
+      this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"] |
+      this.pieces["K"];
+
+      const white_pieces =
+      this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"] |
+      this.pieces["K"];
+
+      let reverse_all_pieces = this.rotate180(all_pieces);
     let rocks = this.pieces["R"];
     while(rocks>0){
-      let first = rocks&((rocks-1n)^this.occupy); 
-      console.log(first);
-      rocks = rocks - first;
+      let first = rocks&((rocks-1n)^this.occupy); // get first rock from avaiable rocks
+      let temp_pieces = all_pieces - first;
+      let right_direction= 0n;
+      if(first>temp_pieces){ //it happens when there no pieces left side the rock
+        right_direction = this.occupy-((first<<1n)-1n);
+      }else{
+        right_direction= temp_pieces^(temp_pieces-first-first);
+      }
+      let reverse_first = this.rotate180(first);
+      let temp_reverse_pieces = reverse_all_pieces - reverse_first;
+      let left_direction = 0n;
+      if(reverse_first>temp_reverse_pieces){ //it happens when there no pieces left side the rock
+        left_direction = this.occupy-((reverse_first<<1n)-1n);
+      }else{
+        left_direction= temp_reverse_pieces^(temp_reverse_pieces-reverse_first-reverse_first);
+      }
+      let rock_moves = right_direction|this.rotate180(left_direction);
+      rock_moves = rock_moves & (white_pieces^this.occupy);
+      console.log(rock_moves.toString(2));
+      rocks = rocks - first; // remove first rock from avaiable rocks
+    }
+  }
+
+  testing_black_rock_moves(){
+    const all_pieces =
+      this.pieces["p"] |
+      this.pieces["n"] |
+      this.pieces["b"] |
+      this.pieces["r"] |
+      this.pieces["q"] |
+      this.pieces["k"] |
+      this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"] |
+      this.pieces["K"];
+
+      const black_pieces =
+      this.pieces["p"] |
+      this.pieces["n"] |
+      this.pieces["b"] |
+      this.pieces["r"] |
+      this.pieces["q"] |
+      this.pieces["k"];
+
+      let reverse_all_pieces = this.rotate180(all_pieces);
+    let rocks = this.pieces["r"];
+    while(rocks>0){
+      let first = rocks&((rocks-1n)^this.occupy); // get first rock from avaiable rocks
+      let temp_pieces = all_pieces - first;
+      let right_direction= 0n;
+      if(first>temp_pieces){ //it happens when there no pieces left side the rock
+        right_direction = this.occupy-((first<<1n)-1n);
+      }else{
+        right_direction= temp_pieces^(temp_pieces-first-first);
+      }
+      let reverse_first = this.rotate180(first);
+      let temp_reverse_pieces = reverse_all_pieces - reverse_first;
+      let left_direction = 0n;
+      if(reverse_first>temp_reverse_pieces){ //it happens when there no pieces left side the rock
+        left_direction = this.occupy-((reverse_first<<1n)-1n);
+      }else{
+        left_direction= temp_reverse_pieces^(temp_reverse_pieces-reverse_first-reverse_first);
+      }
+      let rock_moves = right_direction|this.rotate180(left_direction);
+      rock_moves = rock_moves & (black_pieces^this.occupy);
+      console.log(rock_moves.toString(2));
+      rocks = rocks - first; // remove first rock from avaiable rocks
     }
   }
 
@@ -626,6 +715,30 @@ class BitBoardData {
       sol[i%8]+=str_board[i];
     }
     return sol.join("");
+  }
+
+  mirrorHorizontal (x) {
+    let k1 = BigInt("0b101010101010101010101010101010101010101010101010101010101010101");
+    let k2 = BigInt("0b11001100110011001100110011001100110011001100110011001100110011");
+    let k4 = BigInt("0b111100001111000011110000111100001111000011110000111100001111");
+    x = ((x >> 1n) & k1) | ((x & k1) << 1n);
+    x = ((x >> 2n) & k2) | ((x & k2) << 2n);
+    x = ((x >> 4n) & k4) | ((x & k4) << 4n);
+    return x;
+  }
+  
+  // top row to bottom, bottom to top
+  flipVertical(x) {
+    let k1 = BigInt("0b11111111000000001111111100000000111111110000000011111111");
+    let k2 = BigInt("0b111111111111111100000000000000001111111111111111");
+    x = ((x >>  8n) & k1) | ((x & k1) <<  8n);
+    x = ((x >> 16n) & k2) | ((x & k2) << 16n);
+    x = ( x >> 32n)       | ( x       << 32n);
+    return x;
+  }
+
+  rotate180 (x) {
+    return this.mirrorHorizontal(this.flipVertical(x) );
   }
 
   black_moves() {
