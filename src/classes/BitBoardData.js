@@ -7,7 +7,7 @@ class BitBoardData {
       [" ", " ", " ", "r", " ", "P", " ", " "],
       [" ", " ", " ", " ", " ", " ", " ", " "],
       ["p", "P", " ", "p", " ", " ", " ", " "],
-      [" ", " ", " ", "R", " ", " ", " ", " "],
+      [" ", " ", " ", "R", " ", "p", " ", " "],
       ["P", " ", "p", " ", "P", "P", "P", "P"],
       [" ", "N", " ", " ", "K", " ", "N", "R"],
     ];
@@ -588,26 +588,40 @@ class BitBoardData {
     while(rocks>0){
       let first = rocks&((rocks-1n)^this.occupy); // get first rock from avaiable rocks
       let first_index = first.toString(2).length-1;
-      let mask = (this.rows[Math.floor(first_index / 8)]|this.columns[first_index % 8])
-      let temp_pieces = (all_pieces&mask) - first;
+      let temp_pieces_right = (all_pieces&this.rows[Math.floor(first_index / 8)]) - first;
       let right_direction= 0n;
-      if(first>temp_pieces){ //it happens when there no pieces left side the rock
+      if(first>temp_pieces_right){ //it happens when there no pieces left side the rock
         right_direction = this.occupy-((first<<1n)-1n);
       }else{
-        right_direction= temp_pieces^(temp_pieces-first-first);
+        right_direction= temp_pieces_right^(temp_pieces_right-first-first);
       }
-      right_direction= right_direction&mask;
-      let reverse_mask = this.rotate180(mask);
+      right_direction= right_direction&this.rows[Math.floor(first_index / 8)];
+      let temp_pieces_top = (all_pieces&this.columns[first_index % 8]) - first;
+      let top_direction= 0n;
+      if(first>temp_pieces_top){ //it happens when there no pieces left side the rock
+        top_direction = this.occupy-((first<<1n)-1n);
+      }else{
+        top_direction= temp_pieces_top^(temp_pieces_top-first-first);
+      }
+      top_direction= top_direction&this.columns[first_index % 8];
       let reverse_first = this.rotate180(first);
-      let temp_reverse_pieces = this.rotate180(temp_pieces);
+      let temp_pieces_left = this.rotate180(temp_pieces_right);
       let left_direction = 0n;
-      if(reverse_first>temp_reverse_pieces){ //it happens when there no pieces left side the rock
+      if(reverse_first>temp_pieces_left){ //it happens when there no pieces left side the rock
         left_direction = this.occupy-((reverse_first<<1n)-1n);
       }else{
-        left_direction= temp_reverse_pieces^(temp_reverse_pieces-reverse_first-reverse_first);
+        left_direction= temp_pieces_left^(temp_pieces_left-reverse_first-reverse_first);
       }
-      left_direction = left_direction&reverse_mask;
-      let rock_moves = right_direction|this.rotate180(left_direction);
+      left_direction = left_direction&this.rows[Math.floor((63-first_index) / 8)];
+      let temp_pieces_bottom = this.rotate180(temp_pieces_top);
+      let bottom_direction = 0n;
+      if(reverse_first>temp_pieces_bottom){ //it happens when there no pieces left side the rock
+        bottom_direction = this.occupy-((reverse_first<<1n)-1n);
+      }else{
+        bottom_direction= temp_pieces_bottom^(temp_pieces_bottom-reverse_first-reverse_first);
+      }
+      bottom_direction = bottom_direction&this.columns[(63-first_index) % 8];
+      let rock_moves = right_direction|top_direction|this.rotate180(left_direction|bottom_direction);
       rock_moves = rock_moves & (white_pieces^this.occupy);
       console.log(rock_moves.toString(2));
       rocks = rocks - first; // remove first rock from avaiable rocks
@@ -636,32 +650,44 @@ class BitBoardData {
       this.pieces["r"] |
       this.pieces["q"] |
       this.pieces["k"];
-
-      let reverse_all_pieces = this.rotate180(all_pieces);
     let rocks = this.pieces["r"];
     while(rocks>0){
       let first = rocks&((rocks-1n)^this.occupy); // get first rock from avaiable rocks
       let first_index = first.toString(2).length-1;
-      let mask = (this.rows[Math.floor(first_index / 8)]|this.columns[first_index % 8])
-      let temp_pieces = (all_pieces&mask) - first;
+      let temp_pieces_right = (all_pieces&this.rows[Math.floor(first_index / 8)]) - first;
       let right_direction= 0n;
-      if(first>temp_pieces){ //it happens when there no pieces left side the rock
+      if(first>temp_pieces_right){ //it happens when there no pieces left side the rock
         right_direction = this.occupy-((first<<1n)-1n);
       }else{
-        right_direction= temp_pieces^(temp_pieces-first-first);
+        right_direction= temp_pieces_right^(temp_pieces_right-first-first);
       }
-      right_direction= right_direction&mask;
-      let reverse_mask = this.rotate180(mask);
+      right_direction= right_direction&this.rows[Math.floor(first_index / 8)];
+      let temp_pieces_top = (all_pieces&this.columns[first_index % 8]) - first;
+      let top_direction= 0n;
+      if(first>temp_pieces_top){ //it happens when there no pieces left side the rock
+        top_direction = this.occupy-((first<<1n)-1n);
+      }else{
+        top_direction= temp_pieces_top^(temp_pieces_top-first-first);
+      }
+      top_direction= top_direction&this.columns[first_index % 8];
       let reverse_first = this.rotate180(first);
-      let temp_reverse_pieces = this.rotate180(temp_pieces);
+      let temp_pieces_left = this.rotate180(temp_pieces_right);
       let left_direction = 0n;
-      if(reverse_first>temp_reverse_pieces){ //it happens when there no pieces left side the rock
+      if(reverse_first>temp_pieces_left){ //it happens when there no pieces left side the rock
         left_direction = this.occupy-((reverse_first<<1n)-1n);
       }else{
-        left_direction= temp_reverse_pieces^(temp_reverse_pieces-reverse_first-reverse_first);
+        left_direction= temp_pieces_left^(temp_pieces_left-reverse_first-reverse_first);
       }
-      left_direction = left_direction&reverse_mask;
-      let rock_moves = right_direction|this.rotate180(left_direction);
+      left_direction = left_direction&this.rows[Math.floor((63-first_index) / 8)];
+      let temp_pieces_bottom = this.rotate180(temp_pieces_top);
+      let bottom_direction = 0n;
+      if(reverse_first>temp_pieces_bottom){ //it happens when there no pieces left side the rock
+        bottom_direction = this.occupy-((reverse_first<<1n)-1n);
+      }else{
+        bottom_direction= temp_pieces_bottom^(temp_pieces_bottom-reverse_first-reverse_first);
+      }
+      bottom_direction = bottom_direction&this.columns[(63-first_index) % 8];
+      let rock_moves = right_direction|top_direction|this.rotate180(left_direction|bottom_direction);
       rock_moves = rock_moves & (black_pieces^this.occupy);
       console.log(rock_moves.toString(2));
       rocks = rocks - first; // remove first rock from avaiable rocks
