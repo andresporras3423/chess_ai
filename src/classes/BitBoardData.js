@@ -624,7 +624,6 @@ class BitBoardData {
       bottom_direction = bottom_direction&this.columns[(63-first_index) % 8];
       let rock_moves = right_direction|top_direction|this.rotate180(left_direction|bottom_direction);
       rock_moves = rock_moves & (white_pieces^this.occupy);
-      console.log(rock_moves.toString(2));
       while(rock_moves>0n){
         let first_move = rock_moves&((rock_moves-1n)^this.occupy); 
         let first_move_index = first_move.toString(2).length-1;
@@ -637,6 +636,7 @@ class BitBoardData {
   }
 
   testing_black_rock_moves(){
+    let list="";
     const all_pieces =
       this.pieces["p"] |
       this.pieces["n"] |
@@ -697,9 +697,15 @@ class BitBoardData {
       bottom_direction = bottom_direction&this.columns[(63-first_index) % 8];
       let rock_moves = right_direction|top_direction|this.rotate180(left_direction|bottom_direction);
       rock_moves = rock_moves & (black_pieces^this.occupy);
-      console.log(rock_moves.toString(2));
+      while(rock_moves>0n){
+        let first_move = rock_moves&((rock_moves-1n)^this.occupy); 
+        let first_move_index = first_move.toString(2).length-1;
+        list+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
+        rock_moves = rock_moves - first_move;
+      }
       rocks = rocks - first; // remove first rock from avaiable rocks
     }
+    return list;
   }
 
   white_king_check(){
