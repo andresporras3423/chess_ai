@@ -1,7 +1,7 @@
 import BitBoardData from "./BitBoardData.js";
 
 let b = new BitBoardData();
-console.log(b.testing_black_rock_moves());
+console.log(b.testing_white_rock_moves());
 
 function coord(num){
   let index = num.toString(2).split("").length - 1;
