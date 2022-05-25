@@ -3,11 +3,11 @@ class BitBoardData {
   constructor() {
     this.board = [
       [" ", "n", "R", " ", "r", "k", "n", " "],
-      ["P", "p", " ", "p", " ", " ", "p", "p"],
-      [" ", " ", " ", "r", " ", "P", " ", " "],
-      [" ", " ", " ", " ", " ", " ", " ", " "],
+      ["p", "p", " ", "p", " ", " ", "p", "p"],
+      [" ", " ", " ", "r", " ", " ", " ", " "],
+      [" ", " ", "P", " ", " ", " ", " ", " "],
       ["p", "P", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", "R", " ", "p", " ", " "],
+      [" ", " ", " ", "R", " ", " ", " ", " "],
       ["P", " ", "P", " ", "P", "P", "P", "P"],
       [" ", "N", " ", "K", " ", " ", "N", "R"],
     ];
@@ -562,7 +562,6 @@ class BitBoardData {
   }
 
   testing_white_rock_moves(){
-    let list="";
     const all_pieces =
       this.pieces["p"] |
       this.pieces["n"] |
@@ -628,17 +627,15 @@ class BitBoardData {
         let first_move = rock_moves&((rock_moves-1n)^this.occupy); 
         let first_move_index = first_move.toString(2).length-1;
         this.pieces["R"]=this.pieces["R"] + first_move - first;
-        if(!this.white_king_check()) list+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
+        if(!this.white_king_check()) this.pieces_moves["R"]+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
         this.pieces["R"]=this.pieces["R"] - first_move + first;
         rock_moves = rock_moves - first_move;
       }
       rocks = rocks - first; // remove first rock from avaiable rocks
     }
-    return list;
   }
 
   testing_black_rock_moves(){
-    let list="";
     const all_pieces =
       this.pieces["p"] |
       this.pieces["n"] |
@@ -703,13 +700,12 @@ class BitBoardData {
         let first_move = rock_moves&((rock_moves-1n)^this.occupy); 
         let first_move_index = first_move.toString(2).length-1;
         this.pieces["r"]=this.pieces["r"] + first_move - first;
-        if(!this.black_king_check()) list+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
+        if(!this.black_king_check()) this.pieces_moves["r"]+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
         this.pieces["r"]=this.pieces["r"] - first_move + first;
         rock_moves = rock_moves - first_move;
       }
       rocks = rocks - first; // remove first rock from avaiable rocks
     }
-    return list;
   }
 
   white_king_check(){
@@ -768,7 +764,7 @@ class BitBoardData {
     if((((this.pieces["N"]&inverted_black)<<6n)&this.pieces["k"]&this.inverted_column_a&this.inverted_column_b)>0n) return true;
     // check rock attacks to the king
     // pieces that might be between rocks and the king
-    const block_rock_attacks = this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["r"]|this.pieces["Q"]|this.pieces["p"]|this.pieces["n"]|this.pieces["b"]|this.pieces["q"]|this.pieces["K"]
+    const block_rock_attacks = (this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["r"]|this.pieces["Q"]|this.pieces["p"]|this.pieces["n"]|this.pieces["b"]|this.pieces["q"]|this.pieces["K"])
     let king_index = this.pieces["k"].toString(2).length-1;
     let rocks_row = this.pieces["R"]&this.rows[Math.floor(king_index/8)];
     if(this.pieces["k"]<rocks_row){
