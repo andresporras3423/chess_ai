@@ -2,12 +2,12 @@
 class BitBoardData {
   constructor() {
     this.board = [
-      [" ", "n", "R", " ", "r", "k", "n", " "],
+      ["B", "n", "R", " ", "r", "k", "n", " "],
       ["p", "p", " ", "p", " ", " ", "p", "p"],
       [" ", " ", " ", "r", " ", " ", " ", " "],
       [" ", " ", "P", " ", " ", " ", " ", " "],
       ["p", "P", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", "R", " ", " ", " ", " "],
+      [" ", " ", "B", "R", " ", " ", " ", " "],
       ["P", " ", "P", " ", "P", "P", "P", "P"],
       [" ", "N", " ", "K", " ", " ", "N", "R"],
     ];
@@ -104,21 +104,21 @@ class BitBoardData {
       ]
 
       this.rising_diagonals = [
-        BigInt("0b1000000000000000000000000000000000000000000000000000000000000000"),
-        BigInt("0b0100000010000000000000000000000000000000000000000000000000000000"),
-        BigInt("0b0010000001000000100000000000000000000000000000000000000000000000"),
-        BigInt("0b0001000000100000010000001000000000000000000000000000000000000000"),
-        BigInt("0b0000100000010000001000000100000010000000000000000000000000000000"),
-        BigInt("0b0000010000001000000100000010000001000000100000000000000000000000"),
-        BigInt("0b0000001000000100000010000001000000100000010000001000000000000000"),
-        BigInt("0b0000000100000010000001000000100000010000001000000100000010000000"),
-        BigInt("0b0000000000000001000000100000010000001000000100000010000001000000"),
-        BigInt("0b0000000000000000000000010000001000000100000010000001000000100000"),
-        BigInt("0b0000000000000000000000000000000100000010000001000000100000010000"),
-        BigInt("0b0000000000000000000000000000000000000001000000100000010000001000"),
-        BigInt("0b0000000000000000000000000000000000000000000000010000001000000100"),
-        BigInt("0b0000000000000000000000000000000000000000000000000000000100000010"),
         BigInt("0b0000000000000000000000000000000000000000000000000000000000000001"),
+        BigInt("0b0000000000000000000000000000000000000000000000000000000100000010"),
+        BigInt("0b0000000000000000000000000000000000000000000000010000001000000100"),
+        BigInt("0b0000000000000000000000000000000000000001000000100000010000001000"),
+        BigInt("0b0000000000000000000000000000000100000010000001000000100000010000"),
+        BigInt("0b0000000000000000000000010000001000000100000010000001000000100000"),
+        BigInt("0b0000000000000001000000100000010000001000000100000010000001000000"),
+        BigInt("0b0000000100000010000001000000100000010000001000000100000010000000"),
+        BigInt("0b0000001000000100000010000001000000100000010000001000000000000000"),
+        BigInt("0b0000010000001000000100000010000001000000100000000000000000000000"),
+        BigInt("0b0000100000010000001000000100000010000000000000000000000000000000"),
+        BigInt("0b0001000000100000010000001000000000000000000000000000000000000000"),
+        BigInt("0b0010000001000000100000000000000000000000000000000000000000000000"),
+        BigInt("0b0100000010000000000000000000000000000000000000000000000000000000"),
+        BigInt("0b1000000000000000000000000000000000000000000000000000000000000000")
       ]
     this.row_5 = BigInt(
       "0b0000000000000000000000001111111100000000000000000000000000000000"
@@ -741,6 +741,85 @@ class BitBoardData {
         rock_moves = rock_moves - first_move;
       }
       rocks = rocks - first; // remove first rock from avaiable rocks
+    }
+  }
+
+  testing_white_bishop_moves(){
+    const all_pieces =
+      this.pieces["p"] |
+      this.pieces["n"] |
+      this.pieces["b"] |
+      this.pieces["r"] |
+      this.pieces["q"] |
+      this.pieces["k"] |
+      this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"] |
+      this.pieces["K"];
+
+      const white_pieces =
+      this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"] |
+      this.pieces["K"];
+
+    let bishops = this.pieces["B"];
+    while(bishops>0){
+      let first = bishops&((bishops-1n)^this.occupy); // get first bishop from all bishops
+      let first_index = first.toString(2).length-1;
+      let rising_diagonal = this.rising_diagonals[Math.floor(first_index / 8)+(first_index % 8)];
+      let pieces_rising_top = (all_pieces&rising_diagonal) - first;
+      let rising_top_moves= 0n;
+      if(first>pieces_rising_top){
+        rising_top_moves = this.occupy-((first<<1n)-1n);
+      }else{
+        rising_top_moves= pieces_rising_top^(pieces_rising_top-first-first);
+      }
+      rising_top_moves= rising_top_moves&rising_diagonal;
+      let falling_diagonal = this.falling_diagonals[Math.floor(first_index / 8)-(first_index % 8)+7];
+      let pieces_falling_top = (all_pieces&falling_diagonal) - first;
+      let falling_top_moves= 0n;
+      if(first>pieces_falling_top){ //it happens when there no pieces left side the rock
+        falling_top_moves = this.occupy-((first<<1n)-1n);
+      }else{
+        falling_top_moves= pieces_falling_top^(pieces_falling_top-first-first);
+      }
+      falling_top_moves= falling_top_moves&falling_diagonal;
+      let reverse_rising_diagonal = this.rotate180(rising_diagonal);
+      let reverse_first = this.rotate180(first);
+      let pieces_rising_bottom = this.rotate180(pieces_rising_top);
+      let rising_bottom_moves = 0n;
+      if(reverse_first>pieces_rising_bottom){ //it happens when there no pieces left side the rock
+        rising_bottom_moves = this.occupy-((reverse_first<<1n)-1n);
+      }else{
+        rising_bottom_moves= pieces_rising_bottom^(pieces_rising_bottom-reverse_first-reverse_first);
+      }
+      rising_bottom_moves = rising_bottom_moves&reverse_rising_diagonal;
+      let reverse_falling_diagonal = this.rotate180(falling_diagonal);
+      let pieces_falling_bottom = this.rotate180(pieces_falling_top);
+      let falling_bottom_moves = 0n;
+      if(reverse_first>pieces_falling_bottom){ //it happens when there no pieces left side the rock
+        falling_bottom_moves = this.occupy-((reverse_first<<1n)-1n);
+      }else{
+        falling_bottom_moves= pieces_falling_bottom^(pieces_falling_bottom-reverse_first-reverse_first);
+      }
+      falling_bottom_moves = falling_bottom_moves&reverse_falling_diagonal;
+      let bishop_moves = rising_top_moves|falling_top_moves|this.rotate180(rising_bottom_moves|falling_bottom_moves);
+      bishop_moves = bishop_moves & (white_pieces^this.occupy);
+      while(bishop_moves>0n){
+        let first_move = bishop_moves&((bishop_moves-1n)^this.occupy); 
+        let first_move_index = first_move.toString(2).length-1;
+        this.pieces["B"]=this.pieces["B"] + first_move - first;
+        //if(!this.white_king_check()) 
+        this.pieces_moves["B"]+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
+        this.pieces["B"]=this.pieces["B"] - first_move + first;
+        bishop_moves = bishop_moves - first_move;
+      }
+      bishops = bishops - first; // remove first bishop from list of bishops
     }
   }
 
