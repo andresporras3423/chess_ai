@@ -688,7 +688,7 @@ class BitBoardData {
       this.pieces["K"];
   }
 
-  testing_white_bishop_moves(){
+  testing_bishop_moves(b, same_color_pieces, king_check){
     const all_pieces =
       this.pieces["p"] |
       this.pieces["n"] |
@@ -703,15 +703,7 @@ class BitBoardData {
       this.pieces["Q"] |
       this.pieces["K"];
 
-      const white_pieces =
-      this.pieces["P"] |
-      this.pieces["N"] |
-      this.pieces["B"] |
-      this.pieces["R"] |
-      this.pieces["Q"] |
-      this.pieces["K"];
-
-    let bishops = this.pieces["B"];
+    let bishops = this.pieces[b];
     while(bishops>0){
       let first = bishops&((bishops-1n)^this.occupy); // get first bishop from all bishops
       let first_index = first.toString(2).length-1;
@@ -753,95 +745,25 @@ class BitBoardData {
       }
       falling_bottom_moves = falling_bottom_moves&reverse_falling_diagonal;
       let bishop_moves = rising_top_moves|falling_top_moves|this.rotate180(rising_bottom_moves|falling_bottom_moves);
-      bishop_moves = bishop_moves & (white_pieces^this.occupy);
+      bishop_moves = bishop_moves & (same_color_pieces^this.occupy);
       while(bishop_moves>0n){
         let first_move = bishop_moves&((bishop_moves-1n)^this.occupy); 
         let first_move_index = first_move.toString(2).length-1;
-        this.pieces["B"]=this.pieces["B"] + first_move - first;
-        if(!this.white_king_check()) this.pieces_moves["B"]+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
-        this.pieces["B"]=this.pieces["B"] - first_move + first;
+        this.pieces[b]=this.pieces[b] + first_move - first;
+        if(!king_check()) this.pieces_moves[b]+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
+        this.pieces[b]=this.pieces[b] - first_move + first;
         bishop_moves = bishop_moves - first_move;
       }
       bishops = bishops - first; // remove first bishop from list of bishops
     }
   }
 
-  testing_black_bishop_moves(){
-    const all_pieces =
-      this.pieces["p"] |
-      this.pieces["n"] |
-      this.pieces["b"] |
-      this.pieces["r"] |
-      this.pieces["q"] |
-      this.pieces["k"] |
-      this.pieces["P"] |
-      this.pieces["N"] |
-      this.pieces["B"] |
-      this.pieces["R"] |
-      this.pieces["Q"] |
-      this.pieces["K"];
+  testing_black_bishop_moves = ()=>{
+    this.testing_bishop_moves("b", this.all_black_pieces(), this.black_king_check)
+  }
 
-      const black_pieces =
-      this.pieces["p"] |
-      this.pieces["n"] |
-      this.pieces["b"] |
-      this.pieces["r"] |
-      this.pieces["q"] |
-      this.pieces["k"];
-
-    let bishops = this.pieces["b"];
-    while(bishops>0){
-      let first = bishops&((bishops-1n)^this.occupy); // get first bishop from all bishops
-      let first_index = first.toString(2).length-1;
-      let rising_diagonal = this.rising_diagonals[Math.floor(first_index / 8)+(first_index % 8)];
-      let pieces_rising_top = (all_pieces&rising_diagonal) - first;
-      let rising_top_moves= 0n;
-      if(first>pieces_rising_top){
-        rising_top_moves = this.occupy-((first<<1n)-1n);
-      }else{
-        rising_top_moves= pieces_rising_top^(pieces_rising_top-first-first);
-      }
-      rising_top_moves= rising_top_moves&rising_diagonal;
-      let falling_diagonal = this.falling_diagonals[Math.floor(first_index / 8)-(first_index % 8)+7];
-      let pieces_falling_top = (all_pieces&falling_diagonal) - first;
-      let falling_top_moves= 0n;
-      if(first>pieces_falling_top){ //it happens when there no pieces left side the rock
-        falling_top_moves = this.occupy-((first<<1n)-1n);
-      }else{
-        falling_top_moves= pieces_falling_top^(pieces_falling_top-first-first);
-      }
-      falling_top_moves= falling_top_moves&falling_diagonal;
-      let reverse_rising_diagonal = this.rotate180(rising_diagonal);
-      let reverse_first = this.rotate180(first);
-      let pieces_rising_bottom = this.rotate180(pieces_rising_top);
-      let rising_bottom_moves = 0n;
-      if(reverse_first>pieces_rising_bottom){ //it happens when there no pieces left side the rock
-        rising_bottom_moves = this.occupy-((reverse_first<<1n)-1n);
-      }else{
-        rising_bottom_moves= pieces_rising_bottom^(pieces_rising_bottom-reverse_first-reverse_first);
-      }
-      rising_bottom_moves = rising_bottom_moves&reverse_rising_diagonal;
-      let reverse_falling_diagonal = this.rotate180(falling_diagonal);
-      let pieces_falling_bottom = this.rotate180(pieces_falling_top);
-      let falling_bottom_moves = 0n;
-      if(reverse_first>pieces_falling_bottom){ //it happens when there no pieces left side the rock
-        falling_bottom_moves = this.occupy-((reverse_first<<1n)-1n);
-      }else{
-        falling_bottom_moves= pieces_falling_bottom^(pieces_falling_bottom-reverse_first-reverse_first);
-      }
-      falling_bottom_moves = falling_bottom_moves&reverse_falling_diagonal;
-      let bishop_moves = rising_top_moves|falling_top_moves|this.rotate180(rising_bottom_moves|falling_bottom_moves);
-      bishop_moves = bishop_moves & (black_pieces^this.occupy);
-      while(bishop_moves>0n){
-        let first_move = bishop_moves&((bishop_moves-1n)^this.occupy); 
-        let first_move_index = first_move.toString(2).length-1;
-        this.pieces["b"]=this.pieces["b"] + first_move - first;
-        if(!this.black_king_check()) this.pieces_moves["b"]+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
-        this.pieces["b"]=this.pieces["b"] - first_move + first;
-        bishop_moves = bishop_moves - first_move;
-      }
-      bishops = bishops - first; // remove first bishop from list of bishops
-    }
+  testing_white_bishop_moves = ()=>{
+    this.testing_bishop_moves("B", this.all_white_pieces(), this.white_king_check)
   }
 
   white_king_check = ()=>{
