@@ -2,14 +2,14 @@
 class BitBoardData {
   constructor() {
     this.board = [
-      [" ", "n", "R", " ", "r", "k", "n", " "],
-      ["p", "p", " ", "p", " ", " ", "p", "p"],
+      [" ", "n", " ", " ", "k", " ", "n", " "],
+      ["p", "p", " ", "p", " ", "b", "p", "p"],
       [" ", " ", " ", "r", " ", " ", " ", " "],
-      [" ", " ", "P", " ", " ", " ", " ", "b"],
+      [" ", " ", "P", " ", " ", " ", " ", "B"],
       ["p", "P", " ", " ", " ", " ", " ", " "],
-      ["b", " ", "B", "R", " ", " ", " ", " "],
-      ["P", " ", "P", " ", "P", "P", "P", "P"],
-      [" ", "N", " ", "K", " ", " ", "N", "R"],
+      [" ", " ", " ", "R", " ", " ", " ", " "],
+      ["P", " ", "P", "B", "P", "P", "P", "P"],
+      [" ", "N", "K", " ", " ", " ", "N", "R"],
     ];
     this.boardBinary =
       "0000000000000000000000000000000000000000000000000000000000000000";
@@ -814,8 +814,7 @@ class BitBoardData {
         let first_move = bishop_moves&((bishop_moves-1n)^this.occupy); 
         let first_move_index = first_move.toString(2).length-1;
         this.pieces["B"]=this.pieces["B"] + first_move - first;
-        //if(!this.white_king_check()) 
-        this.pieces_moves["B"]+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
+        if(!this.white_king_check()) this.pieces_moves["B"]+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
         this.pieces["B"]=this.pieces["B"] - first_move + first;
         bishop_moves = bishop_moves - first_move;
       }
@@ -893,8 +892,7 @@ class BitBoardData {
         let first_move = bishop_moves&((bishop_moves-1n)^this.occupy); 
         let first_move_index = first_move.toString(2).length-1;
         this.pieces["b"]=this.pieces["b"] + first_move - first;
-        //if(!this.white_king_check()) 
-        this.pieces_moves["b"]+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
+        if(!this.black_king_check()) this.pieces_moves["b"]+=`${Math.floor(first_index/8)}${first_index%8}${Math.floor(first_move_index/8)}${first_move_index%8}`
         this.pieces["b"]=this.pieces["b"] - first_move + first;
         bishop_moves = bishop_moves - first_move;
       }
@@ -914,21 +912,24 @@ class BitBoardData {
     if((((this.pieces["n"]&inverted_white)>>6n)&this.pieces["K"]&this.inverted_column_g&this.inverted_column_h)>0n) return true;
     if((((this.pieces["n"]&inverted_white)>>10n)&this.pieces["K"]&this.inverted_column_a&this.inverted_column_b)>0n) return true;
     if((((this.pieces["n"]&inverted_white)<<6n)&this.pieces["K"]&this.inverted_column_a&this.inverted_column_b)>0n) return true;
+    // now calculate sliding pieces
+    let king_index = this.pieces["K"].toString(2).length-1;
+    let king_row = Math.floor(king_index/8)
+    let king_column = king_index%8
+    let king_reverse = this.rotate180(this.pieces["K"]);
     // check rock attacks to the king
     // pieces that might be between rocks and the king
     const block_rock_attacks = this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["R"]|this.pieces["Q"]|this.pieces["p"]|this.pieces["n"]|this.pieces["b"]|this.pieces["q"]|this.pieces["k"]
-    let king_index = this.pieces["K"].toString(2).length-1;
-    let rocks_row = this.pieces["r"]&this.rows[Math.floor(king_index/8)];
+    let rocks_row = this.pieces["r"]&this.rows[king_row];
     if(this.pieces["K"]<rocks_row){
       let right_direction= rocks_row^(rocks_row-this.pieces["K"]-this.pieces["K"]);
       if((right_direction&block_rock_attacks)===0n) return true;
     }
-    let rocks_column = this.pieces["r"]&this.columns[king_index%8];
+    let rocks_column = this.pieces["r"]&this.columns[king_column];
     if(this.pieces["K"]<rocks_column){
-      let top_direction= ((rocks_column^(rocks_column-this.pieces["K"]-this.pieces["K"]))&this.columns[king_index%8]);
+      let top_direction= ((rocks_column^(rocks_column-this.pieces["K"]-this.pieces["K"]))&this.columns[king_column]);
       if((top_direction&block_rock_attacks)===0n) return true;
     }
-    let king_reverse = this.rotate180(this.pieces["K"]);
     let rocks_row_reverse = this.rotate180(rocks_row);
     if(king_reverse<rocks_row_reverse){
       let left_direction= rocks_row_reverse^(rocks_row_reverse-king_reverse-king_reverse);
@@ -940,6 +941,33 @@ class BitBoardData {
       let bottom_direction= (rocks_column_reverse^(rocks_column_reverse-king_reverse-king_reverse))&this.columns[(63-king_index)%8];
       bottom_direction = this.rotate180(bottom_direction);
       if((bottom_direction&block_rock_attacks)===0n) return true;
+    }
+    // check bishop attacks to the king
+    // pieces that might be between bishop and the king
+    const block_bishop_attacks = this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["R"]|this.pieces["Q"]|this.pieces["p"]|this.pieces["n"]|this.pieces["r"]|this.pieces["q"]|this.pieces["k"]
+    let king_rising_diagonal = this.rising_diagonals[king_row+king_column];
+    let bishops_rising = this.pieces["b"]&king_rising_diagonal;
+    if(this.pieces["K"]<bishops_rising){
+      let rising_top= (bishops_rising^(bishops_rising-this.pieces["K"]-this.pieces["K"]))&king_rising_diagonal;
+      if((rising_top&block_bishop_attacks)===0n) return true;
+    }
+    let king_falling_diagonal = this.falling_diagonals[king_row-king_column+7];
+    let bishops_falling = this.pieces["b"]&king_falling_diagonal;
+    if(this.pieces["K"]<bishops_falling){
+      let falling_top= (bishops_falling^(bishops_falling-this.pieces["K"]-this.pieces["K"]))&king_falling_diagonal;
+      if((falling_top&block_bishop_attacks)===0n) return true;
+    }
+    let bishops_rising_reverse = this.rotate180(bishops_rising);
+    if(king_reverse<bishops_rising_reverse){
+      let rising_bottom= (bishops_rising_reverse^(bishops_rising_reverse-king_reverse-king_reverse))&this.rotate180(king_rising_diagonal);
+      rising_bottom = this.rotate180(rising_bottom);
+      if((rising_bottom&block_bishop_attacks)===0n) return true;
+    }
+    let bishops_falling_reverse = this.rotate180(bishops_falling);
+    if(king_reverse<bishops_falling_reverse){
+      let falling_bottom= (bishops_falling_reverse^(bishops_falling_reverse-king_reverse-king_reverse))&this.rotate180(king_falling_diagonal);
+      falling_bottom = this.rotate180(falling_bottom);
+      if((falling_bottom&block_bishop_attacks)===0n) return true;
     }
     return false;
   }
@@ -956,21 +984,24 @@ class BitBoardData {
     if((((this.pieces["N"]&inverted_black)>>6n)&this.pieces["k"]&this.inverted_column_g&this.inverted_column_h)>0n) return true;
     if((((this.pieces["N"]&inverted_black)>>10n)&this.pieces["k"]&this.inverted_column_a&this.inverted_column_b)>0n) return true;
     if((((this.pieces["N"]&inverted_black)<<6n)&this.pieces["k"]&this.inverted_column_a&this.inverted_column_b)>0n) return true;
+    // now calculate sliding pieces
+    let king_index = this.pieces["k"].toString(2).length-1;
+    let king_row = Math.floor(king_index/8)
+    let king_column = king_index%8
+    let king_reverse = this.rotate180(this.pieces["k"]);
     // check rock attacks to the king
     // pieces that might be between rocks and the king
-    const block_rock_attacks = (this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["r"]|this.pieces["Q"]|this.pieces["p"]|this.pieces["n"]|this.pieces["b"]|this.pieces["q"]|this.pieces["K"])
-    let king_index = this.pieces["k"].toString(2).length-1;
-    let rocks_row = this.pieces["R"]&this.rows[Math.floor(king_index/8)];
+    const block_rock_attacks = this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["K"]|this.pieces["Q"]|this.pieces["p"]|this.pieces["n"]|this.pieces["b"]|this.pieces["q"]|this.pieces["r"]
+    let rocks_row = this.pieces["R"]&this.rows[king_row];
     if(this.pieces["k"]<rocks_row){
       let right_direction= rocks_row^(rocks_row-this.pieces["k"]-this.pieces["k"]);
       if((right_direction&block_rock_attacks)===0n) return true;
     }
-    let rocks_column = this.pieces["R"]&this.columns[king_index%8];
+    let rocks_column = this.pieces["R"]&this.columns[king_column];
     if(this.pieces["k"]<rocks_column){
-      let top_direction= ((rocks_column^(rocks_column-this.pieces["k"]-this.pieces["k"]))&this.columns[king_index%8]);
+      let top_direction= ((rocks_column^(rocks_column-this.pieces["k"]-this.pieces["k"]))&this.columns[king_column]);
       if((top_direction&block_rock_attacks)===0n) return true;
     }
-    let king_reverse = this.rotate180(this.pieces["k"]);
     let rocks_row_reverse = this.rotate180(rocks_row);
     if(king_reverse<rocks_row_reverse){
       let left_direction= rocks_row_reverse^(rocks_row_reverse-king_reverse-king_reverse);
@@ -982,6 +1013,33 @@ class BitBoardData {
       let bottom_direction= (rocks_column_reverse^(rocks_column_reverse-king_reverse-king_reverse))&this.columns[(63-king_index)%8];
       bottom_direction = this.rotate180(bottom_direction);
       if((bottom_direction&block_rock_attacks)===0n) return true;
+    }
+    // check bishop attacks to the king
+    // pieces that might be between bishop and the king
+    const block_bishop_attacks = this.pieces["P"]|this.pieces["N"]|this.pieces["K"]|this.pieces["R"]|this.pieces["Q"]|this.pieces["p"]|this.pieces["n"]|this.pieces["r"]|this.pieces["q"]|this.pieces["b"]
+    let king_rising_diagonal = this.rising_diagonals[king_row+king_column];
+    let bishops_rising = this.pieces["B"]&king_rising_diagonal;
+    if(this.pieces["k"]<bishops_rising){
+      let rising_top= (bishops_rising^(bishops_rising-this.pieces["k"]-this.pieces["k"]))&king_rising_diagonal;
+      if((rising_top&block_bishop_attacks)===0n) return true;
+    }
+    let king_falling_diagonal = this.falling_diagonals[king_row-king_column+7];
+    let bishops_falling = this.pieces["B"]&king_falling_diagonal;
+    if(this.pieces["k"]<bishops_falling){
+      let falling_top= (bishops_falling^(bishops_falling-this.pieces["k"]-this.pieces["k"]))&king_falling_diagonal;
+      if((falling_top&block_bishop_attacks)===0n) return true;
+    }
+    let bishops_rising_reverse = this.rotate180(bishops_rising);
+    if(king_reverse<bishops_rising_reverse){
+      let rising_bottom= (bishops_rising_reverse^(bishops_rising_reverse-king_reverse-king_reverse))&this.rotate180(king_rising_diagonal);
+      rising_bottom = this.rotate180(rising_bottom);
+      if((rising_bottom&block_bishop_attacks)===0n) return true;
+    }
+    let bishops_falling_reverse = this.rotate180(bishops_falling);
+    if(king_reverse<bishops_falling_reverse){
+      let falling_bottom= (bishops_falling_reverse^(bishops_falling_reverse-king_reverse-king_reverse))&this.rotate180(king_falling_diagonal);
+      falling_bottom = this.rotate180(falling_bottom);
+      if((falling_bottom&block_bishop_attacks)===0n) return true;
     }
     return false;
   }
