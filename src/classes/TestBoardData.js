@@ -2,8 +2,8 @@ import BitBoardData from "./BitBoardData.js";
 
 let b = new BitBoardData();
 (()=>{
-  b.testing_black_knight_moves();
-  console.log(b.pieces_moves["n"]);
+  b.testing_black_queen_moves();
+  console.log(b.pieces_moves["q"]);
 })();
 
 function coord(num){

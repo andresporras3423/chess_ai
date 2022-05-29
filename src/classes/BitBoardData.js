@@ -4,10 +4,10 @@ class BitBoardData {
     this.board = [
       ["R", "n", " ", " ", "k", " ", "n", " "],
       ["p", "p", " ", "p", " ", "b", "p", "p"],
-      [" ", " ", " ", "r", " ", " ", " ", " "],
-      [" ", " ", "P", " ", " ", " ", " ", "B"],
+      ["q", " ", " ", "r", " ", " ", " ", " "],
+      ["q", " ", "P", " ", " ", " ", " ", "B"],
       ["p", "P", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", "R", " ", " ", " ", " "],
+      [" ", " ", " ", "R", " ", " ", "Q", " "],
       ["P", " ", "P", "B", " ", "P", "P", "P"],
       [" ", "N", "K", " ", " ", " ", "N", "R"],
     ];
@@ -703,6 +703,18 @@ class BitBoardData {
 
   testing_white_bishop_moves = ()=>{
     this.testing_bishop_moves("B", this.all_white_pieces(), this.white_king_check)
+  }
+
+  testing_white_queen_moves = ()=>{
+    const all_white = this.all_white_pieces();
+    this.testing_bishop_moves("Q", all_white, this.white_king_check)
+    this.testing_rock_moves("Q", all_white, this.white_king_check)
+  }
+
+  testing_black_queen_moves = ()=>{
+    const all_black = this.all_black_pieces();
+    this.testing_bishop_moves("q", all_black, this.black_king_check)
+    this.testing_rock_moves("q", all_black, this.black_king_check)
   }
 
   white_king_check = ()=>{
