@@ -417,39 +417,32 @@ class BitBoardData {
     }
   }
 
-  test_white_king_moves() {
-    const white_except_k =
-      this.pieces["P"] |
-      this.pieces["N"] |
-      this.pieces["B"] |
-      this.pieces["R"] |
-      this.pieces["Q"];
-    const inverted_white_expect_k = white_except_k ^ this.occupy;
+  testing_king_moves(k, inverted_same_but_k, king_check) {
     let moves_left =
-      ((this.pieces["K"] << 1n) |
-        (this.pieces["K"] << 9n) |
-        (this.pieces["K"] >> 7n)) &
+      ((this.pieces[k] << 1n) |
+        (this.pieces[k] << 9n) |
+        (this.pieces[k] >> 7n)) &
       this.inverted_column_h;
     let moves_right =
-      ((this.pieces["K"] >> 1n) |
-        (this.pieces["K"] << 7n) |
-        (this.pieces["K"] >> 9n)) &
+      ((this.pieces[k] >> 1n) |
+        (this.pieces[k] << 7n) |
+        (this.pieces[k] >> 9n)) &
       this.inverted_column_a;
-    let moves_center = (this.pieces["K"] << 8n) | (this.pieces["K"] >> 8n);
+    let moves_center = (this.pieces[k] << 8n) | (this.pieces[k] >> 8n);
     let king_moves =
-      (moves_left | moves_right | moves_center) & inverted_white_expect_k;
-    let king_origin = this.pieces["K"];
-    let king_index = this.pieces["K"].toString(2).split("").length - 1;
+      (moves_left | moves_right | moves_center) & inverted_same_but_k;
+    let king_origin = this.pieces[k];
+    let king_index = this.pieces[k].toString(2).split("").length - 1;
     let king_row = Math.floor(king_index / 8);
     let king_column = king_index % 8;
     while (king_moves > 0n) {
       let last_index = king_moves.toString(2).split("").length - 1;
       let last_move = 1n << BigInt(last_index);
-      this.pieces["K"] = last_move;
-      let is_check = this.white_king_check();
-      this.pieces["K"] = king_origin;
+      this.pieces[k] = last_move;
+      let is_check = king_check();
+      this.pieces[k] = king_origin;
       if(!is_check){
-        this.pieces_moves["K"] += `${king_row}${king_column}${Math.floor(last_index / 8)}${
+        this.pieces_moves[k] += `${king_row}${king_column}${Math.floor(last_index / 8)}${
           last_index % 8
         }`;
       }
@@ -457,44 +450,24 @@ class BitBoardData {
     }
   }
 
-  test_black_king_moves() {
-    const black_except_k =
-      this.pieces["p"] |
+  testing_white_king_moves=()=>{
+    const inverted_white_except_k =
+      (this.pieces["P"] |
+      this.pieces["N"] |
+      this.pieces["B"] |
+      this.pieces["R"] |
+      this.pieces["Q"])^ this.occupy;
+    this.testing_king_moves("K", inverted_white_except_k, this.white_king_check);
+  }
+
+  testing_black_king_moves=()=>{
+    const inverted_black_except_k =
+      (this.pieces["p"] |
       this.pieces["n"] |
       this.pieces["b"] |
       this.pieces["r"] |
-      this.pieces["q"];
-    const inverted_black_expect_k = black_except_k ^ this.occupy;
-    let moves_left =
-      ((this.pieces["k"] << 1n) |
-        (this.pieces["k"] << 9n) |
-        (this.pieces["k"] >> 7n)) &
-      this.inverted_column_h;
-    let moves_right =
-      ((this.pieces["k"] >> 1n) |
-        (this.pieces["k"] << 7n) |
-        (this.pieces["k"] >> 9n)) &
-      this.inverted_column_a;
-    let moves_center = (this.pieces["k"] << 8n) | (this.pieces["k"] >> 8n);
-    let king_moves =
-      (moves_left | moves_right | moves_center) & inverted_black_expect_k;
-    let king_origin = this.pieces["k"];
-    let king_index = this.pieces["k"].toString(2).split("").length - 1;
-    let king_row = Math.floor(king_index / 8);
-    let king_column = king_index % 8;
-    while (king_moves > 0n) {
-      let last_index = king_moves.toString(2).split("").length - 1;
-      let last_move = 1n << BigInt(last_index);
-      this.pieces["k"] = last_move;
-      let is_check = this.black_king_check();
-      this.pieces["k"] = king_origin;
-      if(!is_check){
-        this.pieces_moves["k"] += `${king_row}${king_column}${Math.floor(last_index / 8)}${
-          last_index % 8
-        }`;
-      }
-      king_moves = king_moves ^ last_move;
-    }
+      this.pieces["q"])^ this.occupy;
+    this.testing_king_moves("k", inverted_black_except_k, this.black_king_check);
   }
 
   test_white_knight_moves() {
@@ -978,14 +951,14 @@ class BitBoardData {
   black_moves() {
       this.clear_moves();
       this.test_black_knight_moves();
-      this.test_black_king_moves();
+      this.testing_black_king_moves();
       this.testing_black_pawn_moves();
       return this.pieces_moves;
   }
 
   white_moves() {
       this.test_white_knight_moves();
-      this.test_white_king_moves();
+      this.testing_white_king_moves();
       this.testing_white_pawn_moves();
       return this.pieces_moves;
   }
