@@ -2,13 +2,13 @@
 class BitBoardData {
   constructor() {
     this.board = [
-      ["R", "n", " ", " ", "k", " ", "n", " "],
-      ["p", "p", " ", "p", " ", "b", "p", "p"],
-      ["q", " ", " ", "r", " ", " ", " ", " "],
-      ["q", " ", "P", " ", " ", " ", " ", "B"],
+      ["R", "n", "Q", " ", "k", " ", "n", " "],
+      ["p", "p", " ", "p", "q", "b", "p", "p"],
+      [" ", " ", " ", "r", " ", " ", " ", " "],
+      [" ", " ", "P", " ", " ", " ", " ", "B"],
       ["p", "P", " ", " ", " ", " ", " ", " "],
-      [" ", " ", " ", "R", " ", " ", "Q", " "],
-      ["P", " ", "P", "B", " ", "P", "P", "P"],
+      [" ", " ", " ", "R", " ", " ", " ", " "],
+      ["P", " ", "P", " ", " ", "P", "P", "P"],
       [" ", "N", "K", " ", " ", " ", "N", "R"],
     ];
     this.boardBinary =
@@ -734,12 +734,9 @@ class BitBoardData {
     let king_row = Math.floor(king_index/8)
     let king_column = king_index%8
     let king_reverse = this.rotate180(this.pieces["K"]);
-    // check rock attacks to the king
-    // pieces that might be between rocks and the king
     if(this.rock_checks_to_white(king_index, king_column, king_row, king_reverse)) return true;
-    // check bishop attacks to the king
-    // pieces that might be between bishop and the king
     if(this.bishop_checks_to_white(king_column, king_row, king_reverse)) return true;
+    if(this.queen_checks_to_white(king_index, king_column, king_row, king_reverse)) return true;
     return false;
   }
 
@@ -760,12 +757,9 @@ class BitBoardData {
     let king_row = Math.floor(king_index/8)
     let king_column = king_index%8
     let king_reverse = this.rotate180(this.pieces["k"]);
-    // check rock attacks to the king
-    // pieces that might be between rocks and the king
     if(this.rock_checks_to_black(king_index, king_column, king_row, king_reverse)) return true;
-    // check bishop attacks to the king
-    // pieces that might be between bishop and the king
     if(this.bishop_checks_to_black(king_column, king_row, king_reverse)) return true;
+    if(this.queen_checks_to_black(king_index, king_column, king_row, king_reverse)) return true;
     return false;
   }
 
@@ -807,12 +801,26 @@ class BitBoardData {
 
   bishop_checks_to_black = (king_column, king_row, king_reverse)=>{
     const block_bishop_attacks = this.pieces["P"]|this.pieces["N"]|this.pieces["K"]|this.pieces["R"]|this.pieces["Q"]|this.pieces["p"]|this.pieces["n"]|this.pieces["r"]|this.pieces["q"]|this.pieces["b"];
-    this.bishop_checks(king_column, king_row, king_reverse, block_bishop_attacks, "k", "B")
+    return this.bishop_checks(king_column, king_row, king_reverse, block_bishop_attacks, "k", "B")
   }
 
   bishop_checks_to_white = (king_column, king_row, king_reverse)=>{
     const block_bishop_attacks = this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["R"]|this.pieces["Q"]|this.pieces["p"]|this.pieces["n"]|this.pieces["r"]|this.pieces["q"]|this.pieces["k"]
-    this.bishop_checks(king_column, king_row, king_reverse, block_bishop_attacks, "K", "b")
+    return this.bishop_checks(king_column, king_row, king_reverse, block_bishop_attacks, "K", "b")
+  }
+
+  queen_checks_to_black = (king_index, king_column, king_row, king_reverse)=>{
+    const block_queen_attacks = this.pieces["P"]|this.pieces["N"]|this.pieces["K"]|this.pieces["R"]|this.pieces["B"]|this.pieces["p"]|this.pieces["n"]|this.pieces["r"]|this.pieces["q"]|this.pieces["b"];
+    if(this.bishop_checks(king_column, king_row, king_reverse, block_queen_attacks, "k", "Q")) return true;
+    if(this.rock_checks(king_index, king_column, king_row, king_reverse, block_queen_attacks, "k", "Q")) return true;
+    return false;
+  }
+
+  queen_checks_to_white = (king_index, king_column, king_row, king_reverse)=>{
+    const block_queen_attacks = this.pieces["P"]|this.pieces["N"]|this.pieces["B"]|this.pieces["R"]|this.pieces["Q"]|this.pieces["p"]|this.pieces["n"]|this.pieces["r"]|this.pieces["b"]|this.pieces["k"]
+    if(this.bishop_checks(king_column, king_row, king_reverse, block_queen_attacks, "K", "q")) return true;
+    if(this.rock_checks(king_index, king_column, king_row, king_reverse, block_queen_attacks, "K", "q")) return true;
+    return false;
   }
 
   bishop_checks = (king_column, king_row, king_reverse, block_bishop_attacks, k, b)=>{
